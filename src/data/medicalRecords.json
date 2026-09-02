@@ -1,0 +1,75 @@
+[
+  {
+    "id": "vis_301",
+    "patientId": "usr_004",
+    "patient": "Elena Whitfield",
+    "date": "2026-08-01",
+    "doctor": "Dr. Marcus Reyes",
+    "visitType": "Follow-up",
+    "diagnosis": "Type 2 Diabetes, Hypercholesterolemia — stable",
+    "vitals": { "bp": "128/82", "hr": "76 bpm", "temp": "98.4°F", "weight": "68 kg" },
+    "notes": "Adherence improving. Continue current regimen, recheck lipid panel in 3 months.",
+    "testResults": [
+      { "name": "HbA1c", "result": "6.8%", "status": "normal" },
+      { "name": "LDL Cholesterol", "result": "142 mg/dL", "status": "high" }
+    ]
+  },
+  {
+    "id": "vis_290",
+    "patientId": "usr_004",
+    "patient": "Elena Whitfield",
+    "date": "2026-06-14",
+    "doctor": "Dr. Marcus Reyes",
+    "visitType": "Acute",
+    "diagnosis": "Upper respiratory infection",
+    "vitals": { "bp": "122/80", "hr": "82 bpm", "temp": "100.2°F", "weight": "68 kg" },
+    "notes": "Prescribed 7-day course of Amoxicillin. Advised rest and fluids.",
+    "testResults": [
+      { "name": "Rapid Strep Test", "result": "Negative", "status": "normal" }
+    ]
+  },
+  {
+    "id": "vis_302",
+    "patientId": "usr_010",
+    "patient": "Jonah Petrov",
+    "date": "2026-08-02",
+    "doctor": "Dr. Marcus Reyes",
+    "visitType": "Initial consult",
+    "diagnosis": "Essential hypertension, newly diagnosed",
+    "vitals": { "bp": "148/94", "hr": "88 bpm", "temp": "98.6°F", "weight": "91 kg" },
+    "notes": "Started on Lisinopril 10mg. Lifestyle counseling provided. Follow up in 4 weeks.",
+    "testResults": [
+      { "name": "Basic Metabolic Panel", "result": "Within range", "status": "normal" },
+      { "name": "ECG", "result": "Normal sinus rhythm", "status": "normal" }
+    ]
+  },
+  {
+    "id": "vis_303",
+    "patientId": "usr_011",
+    "patient": "Naomi Reyes",
+    "date": "2026-08-04",
+    "doctor": "Dr. Grace Liu",
+    "visitType": "Follow-up",
+    "diagnosis": "Asthma — well controlled",
+    "vitals": { "bp": "114/72", "hr": "70 bpm", "temp": "98.2°F", "weight": "58 kg" },
+    "notes": "Peak flow stable. Continue Salbutamol as needed.",
+    "testResults": [
+      { "name": "Spirometry", "result": "FEV1 92% predicted", "status": "normal" }
+    ]
+  },
+  {
+    "id": "vis_304",
+    "patientId": "usr_012",
+    "patient": "Marcus Webb",
+    "date": "2026-08-05",
+    "doctor": "Dr. Marcus Reyes",
+    "visitType": "Post-op review",
+    "diagnosis": "Post cardiac bypass — recovery on track",
+    "vitals": { "bp": "132/85", "hr": "68 bpm", "temp": "98.5°F", "weight": "84 kg" },
+    "notes": "Incision healing well. Continue cardiac rehab. Labs ordered.",
+    "testResults": [
+      { "name": "Troponin", "result": "0.01 ng/mL", "status": "normal" },
+      { "name": "Lipid Panel", "result": "Pending", "status": "pending" }
+    ]
+  }
+]

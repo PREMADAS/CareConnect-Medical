@@ -1,0 +1,7 @@
+[
+  { "id": "n1", "type": "reminder", "title": "Time to take Metformin 500mg", "body": "Scheduled for 8:00 PM today.", "time": "2m ago", "read": false },
+  { "id": "n2", "type": "appointment", "title": "Appointment confirmed", "body": "Dr. Marcus Reyes — Aug 8, 10:30 AM.", "time": "1h ago", "read": false },
+  { "id": "n3", "type": "prescription", "title": "New prescription issued", "body": "Rx #1001 from Dr. Marcus Reyes.", "time": "3h ago", "read": true },
+  { "id": "n4", "type": "system", "title": "Low stock alert", "body": "Amoxicillin 250mg is below reorder threshold.", "time": "5h ago", "read": true },
+  { "id": "n5", "type": "reminder", "title": "Missed dose", "body": "Sertraline 50mg was not marked as taken.", "time": "Yesterday", "read": true }
+]

@@ -1,0 +1,8 @@
+[
+  { "id": "exp_01", "category": "Staff Salaries", "vendor": "Payroll — August", "amount": 42000.00, "date": "2026-08-01" },
+  { "id": "exp_02", "category": "Medical Supplies", "vendor": "MedSupply Co.", "amount": 8600.00, "date": "2026-08-02" },
+  { "id": "exp_03", "category": "Facility Lease", "vendor": "Harbor Ave Properties", "amount": 6200.00, "date": "2026-08-01" },
+  { "id": "exp_04", "category": "Software & Licensing", "vendor": "CareConnect Platform", "amount": 1400.00, "date": "2026-08-03" },
+  { "id": "exp_05", "category": "Equipment Maintenance", "vendor": "MediTech Services", "amount": 2150.00, "date": "2026-08-04" },
+  { "id": "exp_06", "category": "Utilities", "vendor": "City Power & Water", "amount": 1890.00, "date": "2026-08-05" }
+]

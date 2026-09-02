@@ -1,0 +1,10 @@
+[
+  { "id": "med_001", "name": "Metformin", "strength": "500mg", "form": "Tablet", "stock": 420, "category": "Diabetes", "manufacturer": "Sandoz" },
+  { "id": "med_002", "name": "Lisinopril", "strength": "10mg", "form": "Tablet", "stock": 18, "category": "Cardiovascular", "manufacturer": "Pfizer" },
+  { "id": "med_003", "name": "Atorvastatin", "strength": "20mg", "form": "Tablet", "stock": 260, "category": "Cardiovascular", "manufacturer": "Viatris" },
+  { "id": "med_004", "name": "Amoxicillin", "strength": "250mg", "form": "Capsule", "stock": 9, "category": "Antibiotic", "manufacturer": "GSK" },
+  { "id": "med_005", "name": "Salbutamol Inhaler", "strength": "100mcg", "form": "Inhaler", "stock": 74, "category": "Respiratory", "manufacturer": "Cipla" },
+  { "id": "med_006", "name": "Levothyroxine", "strength": "75mcg", "form": "Tablet", "stock": 190, "category": "Endocrine", "manufacturer": "Abbott" },
+  { "id": "med_007", "name": "Sertraline", "strength": "50mg", "form": "Tablet", "stock": 132, "category": "Mental Health", "manufacturer": "Zydus" },
+  { "id": "med_008", "name": "Insulin Glargine", "strength": "100u/mL", "form": "Injection", "stock": 5, "category": "Diabetes", "manufacturer": "Sanofi" }
+]

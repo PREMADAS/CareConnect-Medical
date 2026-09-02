@@ -1,0 +1,63 @@
+[
+  {
+    "id": "usr_001",
+    "name": "Ariana Coleman",
+    "email": "admin@careconnect.io",
+    "password": "password",
+    "role": "super-admin",
+    "avatar": "https://i.pravatar.cc/150?img=47",
+    "phone": "+1 (555) 010-2201",
+    "status": "active",
+    "twoFactorEnabled": true
+  },
+  {
+    "id": "usr_002",
+    "name": "Dr. Marcus Reyes",
+    "email": "doctor@careconnect.io",
+    "password": "password",
+    "role": "doctor",
+    "avatar": "https://i.pravatar.cc/150?img=12",
+    "phone": "+1 (555) 010-2202",
+    "specialty": "Cardiology",
+    "license": "MD-88214-CA",
+    "status": "active",
+    "twoFactorEnabled": true
+  },
+  {
+    "id": "usr_003",
+    "name": "Priya Nathan",
+    "email": "pharmacist@careconnect.io",
+    "password": "password",
+    "role": "pharmacist",
+    "avatar": "https://i.pravatar.cc/150?img=32",
+    "phone": "+1 (555) 010-2203",
+    "pharmacy": "Meridian Central Pharmacy",
+    "status": "active",
+    "twoFactorEnabled": false
+  },
+  {
+    "id": "usr_004",
+    "name": "Elena Whitfield",
+    "email": "patient@careconnect.io",
+    "password": "password",
+    "role": "patient",
+    "avatar": "https://i.pravatar.cc/150?img=5",
+    "phone": "+1 (555) 010-2204",
+    "dob": "1988-04-12",
+    "bloodType": "O+",
+    "status": "active",
+    "twoFactorEnabled": false
+  },
+  {
+    "id": "usr_005",
+    "name": "Samuel Whitfield",
+    "email": "caretaker@careconnect.io",
+    "password": "password",
+    "role": "caretaker",
+    "avatar": "https://i.pravatar.cc/150?img=33",
+    "phone": "+1 (555) 010-2205",
+    "relationTo": "usr_004",
+    "status": "active",
+    "twoFactorEnabled": false
+  }
+]

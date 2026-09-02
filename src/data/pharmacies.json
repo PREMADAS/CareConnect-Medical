@@ -1,0 +1,6 @@
+[
+  { "id": "ph_01", "name": "Meridian Central Pharmacy", "address": "220 Harbor Ave, Dhaka", "distance": "0.6 km", "open": true, "rating": 4.8, "stockMatch": 100 },
+  { "id": "ph_02", "name": "GreenLeaf Pharmacy", "address": "45 Gulshan Rd, Dhaka", "distance": "1.2 km", "open": true, "rating": 4.5, "stockMatch": 80 },
+  { "id": "ph_03", "name": "CarePlus Drugstore", "address": "18 Banani Blvd, Dhaka", "distance": "2.4 km", "open": false, "rating": 4.2, "stockMatch": 60 },
+  { "id": "ph_04", "name": "Wellness Point Pharmacy", "address": "9 Dhanmondi Cir, Dhaka", "distance": "3.1 km", "open": true, "rating": 4.6, "stockMatch": 100 }
+]

@@ -1,0 +1,10 @@
+[
+  { "id": "inv_2001", "patient": "Elena Whitfield", "patientId": "usr_004", "doctor": "Dr. Marcus Reyes", "type": "Consultation", "amount": 120.00, "status": "paid", "date": "2026-08-01", "method": "Card" },
+  { "id": "inv_2002", "patient": "Elena Whitfield", "patientId": "usr_004", "doctor": "Dr. Marcus Reyes", "type": "Medicine", "amount": 64.50, "status": "paid", "date": "2026-08-01", "method": "Insurance" },
+  { "id": "inv_2003", "patient": "Jonah Petrov", "patientId": "usr_010", "doctor": "Dr. Marcus Reyes", "type": "Lab Test", "amount": 210.00, "status": "pending", "date": "2026-08-02", "method": "—" },
+  { "id": "inv_2004", "patient": "Naomi Reyes", "patientId": "usr_011", "doctor": "Dr. Grace Liu", "type": "Consultation", "amount": 95.00, "status": "overdue", "date": "2026-07-18", "method": "—" },
+  { "id": "inv_2005", "patient": "Marcus Webb", "patientId": "usr_012", "doctor": "Dr. Marcus Reyes", "type": "Consultation", "amount": 150.00, "status": "paid", "date": "2026-08-05", "method": "Cash" },
+  { "id": "inv_2006", "patient": "Marcus Webb", "patientId": "usr_012", "doctor": "Dr. Marcus Reyes", "type": "Lab Test", "amount": 340.00, "status": "pending", "date": "2026-08-05", "method": "—" },
+  { "id": "inv_2007", "patient": "Elena Whitfield", "patientId": "usr_004", "doctor": "Dr. Marcus Reyes", "type": "Medicine", "amount": 48.20, "status": "pending", "date": "2026-08-06", "method": "—" },
+  { "id": "inv_2008", "patient": "Jonah Petrov", "patientId": "usr_010", "doctor": "Dr. Marcus Reyes", "type": "Consultation", "amount": 120.00, "status": "overdue", "date": "2026-07-22", "method": "—" }
+]

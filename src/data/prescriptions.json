@@ -1,0 +1,55 @@
+[
+  {
+    "id": "rx_1001",
+    "patient": "Elena Whitfield",
+    "patientId": "usr_004",
+    "doctor": "Dr. Marcus Reyes",
+    "doctorId": "usr_002",
+    "issuedOn": "2026-07-28",
+    "status": "active",
+    "qrCode": "CC-RX-1001-4F2A",
+    "items": [
+      { "medicine": "Metformin 500mg", "dosage": "1 tablet", "frequency": "Twice daily", "duration": "30 days" },
+      { "medicine": "Atorvastatin 20mg", "dosage": "1 tablet", "frequency": "Once at night", "duration": "30 days" }
+    ]
+  },
+  {
+    "id": "rx_1002",
+    "patient": "Elena Whitfield",
+    "patientId": "usr_004",
+    "doctor": "Dr. Marcus Reyes",
+    "doctorId": "usr_002",
+    "issuedOn": "2026-06-14",
+    "status": "fulfilled",
+    "qrCode": "CC-RX-1002-9B7C",
+    "items": [
+      { "medicine": "Amoxicillin 250mg", "dosage": "1 capsule", "frequency": "3 times daily", "duration": "7 days" }
+    ]
+  },
+  {
+    "id": "rx_1003",
+    "patient": "Jonah Petrov",
+    "patientId": "usr_010",
+    "doctor": "Dr. Marcus Reyes",
+    "doctorId": "usr_002",
+    "issuedOn": "2026-08-02",
+    "status": "pending",
+    "qrCode": "CC-RX-1003-1D3E",
+    "items": [
+      { "medicine": "Lisinopril 10mg", "dosage": "1 tablet", "frequency": "Once daily", "duration": "60 days" }
+    ]
+  },
+  {
+    "id": "rx_1004",
+    "patient": "Naomi Reyes",
+    "patientId": "usr_011",
+    "doctor": "Dr. Marcus Reyes",
+    "doctorId": "usr_002",
+    "issuedOn": "2026-08-04",
+    "status": "expired",
+    "qrCode": "CC-RX-1004-7A0F",
+    "items": [
+      { "medicine": "Salbutamol Inhaler", "dosage": "2 puffs", "frequency": "As needed", "duration": "90 days" }
+    ]
+  }
+]

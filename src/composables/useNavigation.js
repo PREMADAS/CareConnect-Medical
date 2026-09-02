@@ -1,0 +1,78 @@
+import {
+  HomeIcon,
+  UsersIcon,
+  BuildingOffice2Icon,
+  ChartBarIcon,
+  ClipboardDocumentListIcon,
+  BellAlertIcon,
+  Cog6ToothIcon,
+  UserCircleIcon,
+  CalendarDaysIcon,
+  DocumentTextIcon,
+  BeakerIcon,
+  MagnifyingGlassCircleIcon,
+  QrCodeIcon,
+  ShieldCheckIcon,
+  ClockIcon,
+  HeartIcon,
+  CurrencyDollarIcon,
+  DocumentChartBarIcon,
+} from '@heroicons/vue/24/outline'
+
+const navByRole = {
+  'super-admin': [
+    { label: 'Overview', to: '/super-admin/dashboard', icon: HomeIcon },
+    { label: 'Users', to: '/super-admin/users', icon: UsersIcon },
+    { label: 'Facilities', to: '/super-admin/facilities', icon: BuildingOffice2Icon },
+    { label: 'Analytics', to: '/super-admin/analytics', icon: ChartBarIcon },
+    { label: 'Reports', to: '/super-admin/reports', icon: DocumentTextIcon },
+    { label: 'Billing & Accounting', to: '/super-admin/billing', icon: CurrencyDollarIcon },
+    { label: 'Access Control', to: '/super-admin/access-control', icon: ShieldCheckIcon },
+    { label: 'Notifications', to: '/super-admin/notifications', icon: BellAlertIcon },
+    { label: 'Settings', to: '/super-admin/settings', icon: Cog6ToothIcon },
+  ],
+  doctor: [
+    { label: 'Overview', to: '/doctor/dashboard', icon: HomeIcon },
+    { label: 'Appointments', to: '/doctor/appointments', icon: CalendarDaysIcon },
+    { label: 'Prescriptions', to: '/doctor/prescriptions', icon: ClipboardDocumentListIcon },
+    { label: 'Patients', to: '/doctor/patients', icon: UsersIcon },
+    { label: 'Reports', to: '/doctor/reports', icon: DocumentTextIcon },
+    { label: 'Notifications', to: '/doctor/notifications', icon: BellAlertIcon },
+    { label: 'Profile', to: '/doctor/profile', icon: UserCircleIcon },
+    { label: 'Settings', to: '/doctor/settings', icon: Cog6ToothIcon },
+  ],
+  pharmacist: [
+    { label: 'Overview', to: '/pharmacist/dashboard', icon: HomeIcon },
+    { label: 'Prescriptions', to: '/pharmacist/prescriptions', icon: ClipboardDocumentListIcon },
+    { label: 'Inventory', to: '/pharmacist/inventory', icon: BeakerIcon },
+    { label: 'Scan QR', to: '/pharmacist/scan', icon: QrCodeIcon },
+    { label: 'Notifications', to: '/pharmacist/notifications', icon: BellAlertIcon },
+    { label: 'Profile', to: '/pharmacist/profile', icon: UserCircleIcon },
+    { label: 'Settings', to: '/pharmacist/settings', icon: Cog6ToothIcon },
+  ],
+  patient: [
+    { label: 'Overview', to: '/patient/dashboard', icon: HomeIcon },
+    { label: 'Medicine Schedule', to: '/patient/schedule', icon: ClockIcon },
+    { label: 'Prescriptions', to: '/patient/prescriptions', icon: ClipboardDocumentListIcon },
+    { label: 'Medical History', to: '/patient/medical-history', icon: DocumentChartBarIcon },
+    { label: 'Appointments', to: '/patient/appointments', icon: CalendarDaysIcon },
+    { label: 'Find Pharmacy', to: '/patient/pharmacy-search', icon: MagnifyingGlassCircleIcon },
+    { label: 'My QR Code', to: '/patient/qr-code', icon: QrCodeIcon },
+    { label: 'Notifications', to: '/patient/notifications', icon: BellAlertIcon },
+    { label: 'Profile', to: '/patient/profile', icon: UserCircleIcon },
+    { label: 'Settings', to: '/patient/settings', icon: Cog6ToothIcon },
+  ],
+  caretaker: [
+    { label: 'Overview', to: '/caretaker/dashboard', icon: HomeIcon },
+    { label: 'Care Recipients', to: '/caretaker/recipients', icon: HeartIcon },
+    { label: 'Medicine Schedule', to: '/caretaker/schedule', icon: ClockIcon },
+    { label: 'Appointments', to: '/caretaker/appointments', icon: CalendarDaysIcon },
+    { label: 'Notifications', to: '/caretaker/notifications', icon: BellAlertIcon },
+    { label: 'Profile', to: '/caretaker/profile', icon: UserCircleIcon },
+    { label: 'Settings', to: '/caretaker/settings', icon: Cog6ToothIcon },
+  ],
+}
+
+export function useNavigation(role) {
+  return navByRole[role] || []
+}

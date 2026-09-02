@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-meridian-100 dark:border-white/10;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    @apply bg-pulse-400/30;
+  }
+  :focus-visible {
+    outline: 2px solid #ff6b5b;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-meridian-200 dark:bg-meridian-800 rounded-full;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Glassmorphism surface — the recurring material of the app */
+  .glass {
+    @apply bg-white/70 dark:bg-surface-darkcard/60 backdrop-blur-glass border border-white/40 dark:border-white/10 shadow-glass dark:shadow-glass-dark;
+  }
+
+  .glass-panel {
+    @apply glass rounded-xl2;
+  }
+
+  .card-base {
+    @apply bg-surface-card dark:bg-surface-darkcard border border-meridian-100 dark:border-white/10 rounded-xl2 shadow-sm;
+  }
+
+  /* Signature: pulse-line divider, evokes an ECG trace / medicine schedule timeline */
+  .pulse-divider {
+    @apply w-full h-6 text-pulse-400/70 dark:text-pulse-400/60;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-meridian-100 dark:bg-white/10 rounded-md;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    background-size: 400px 100%;
+    animation: shimmer 1.8s linear infinite;
+  }
+  .dark .skeleton::after {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    background-size: 400px 100%;
+  }
+
+  .btn-focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-pulse-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-light dark:focus-visible:ring-offset-surface-dark;
+  }
+}
