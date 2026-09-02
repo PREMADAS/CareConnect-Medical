@@ -5,6 +5,8 @@ Chart.js, and Heroicons. Backend-integration-ready (Laravel / Inertia.js compati
 
 ## Quick start
 
+Live Link:https://medi-red-five.vercel.app/login
+
 ```bash
 npm install
 npm run dev       # http://localhost:5173
