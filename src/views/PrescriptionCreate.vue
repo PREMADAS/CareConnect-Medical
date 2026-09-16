@@ -1,8 +1,9 @@
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
 
@@ -10,14 +11,8 @@ const router = useRouter()
 const auth = useAuthStore()
 const ui = useUiStore()
 
-/* =====================================================================
-   MOCK DATA — replace with real API / Pinia store calls once wired up.
-   Each block below is marked with the integration point it should hit.
-===================================================================== */
+const showPreview = ref(false)
 
-// TODO: replace with GET /api/medicines (or a medicines Pinia store)
-// `allergyGroup` is used for the basic allergy-warning check below —
-// in a real integration this should come from the drug's actual allergen class.
 const MEDICINE_DB = [
   { brand: 'Napa', generic: 'Paracetamol 500mg', dose: '1+1+1', instruction: 'খাবারের পর', duration: '৫ দিন', allergyGroup: null },
   { brand: 'Napa Extend', generic: 'Paracetamol 665mg', dose: '1+0+1', instruction: 'খাবারের পর', duration: '৫ দিন', allergyGroup: null },
@@ -30,13 +25,10 @@ const MEDICINE_DB = [
   { brand: 'Ace', generic: 'Aspirin 75mg', dose: '0+1+0', instruction: 'খাবারের পর', duration: 'চলমান', allergyGroup: 'NSAID' },
 ]
 
-// TODO: replace with a real drug-interaction API (e.g. First Databank, RxNorm).
-// This is a minimal illustrative stub — pairs listed either direction trigger a warning.
 const INTERACTION_PAIRS = [
   ['Ecosprin', 'Ace'], // duplicate NSAID example
 ]
 
-// TODO: replace with GET /api/patients?search= (match by regNo or mobile)
 const PATIENT_DB = [
   {
     regNo: 'REG-1042', name: 'Kamal Hossain', age: '45', sex: 'Male', weight: '72', mobile: '01711000000',
@@ -52,7 +44,6 @@ const PATIENT_DB = [
   },
 ]
 
-// TODO: replace with GET /api/prescription-templates (doctor-scoped, saved templates)
 const TEMPLATES = [
   {
     name: 'Common Cold – Adult',
@@ -158,9 +149,6 @@ const report = reactive({
 function addReport() { report.entries.push({ name: '', date: '', result: '', unit: '' }) }
 function removeReport(i) { report.entries.splice(i, 1) }
 
-/* =====================================================================
-   1 & 2. Tab completion dots + Next button
-===================================================================== */
 const tabHasData = {
   history: () => history.complaints.some(c => c.text) || history.background.length > 0,
   exam: () => Object.values(vitals).some(v => v),
@@ -225,8 +213,6 @@ function applyTemplate() {
 const openSuggestFor = ref(null) // index of row currently showing suggestions
 const highlightedIndex = ref(-1) // keyboard-highlighted row within the open dropdown
 
-// Matches on brand OR generic name now, so a doctor typing "paracetamol"
-// finds "Napa" just as easily as typing the brand itself.
 function brandMatches(text) {
   const q = (text || '').trim().toLowerCase()
   if (!q) return []
@@ -245,10 +231,6 @@ function pickBrand(i, med) {
 function pickDoseChip(i, chip) { rx.drugs[i].dose = chip }
 function pickInstructionChip(i, chip) { rx.drugs[i].instruction = chip }
 
-/* ---- Keyboard navigation for the brand autocomplete ----
-   ↓/↑ move the highlight, Enter picks the highlighted (or first) match,
-   Escape closes the dropdown — so a doctor never has to reach for the mouse
-   to add a drug they know by name. */
 function onBrandKeydown(i, event) {
   const matches = brandMatches(rx.drugs[i].brand)
   if (!matches.length) return
@@ -268,9 +250,6 @@ function onBrandKeydown(i, event) {
   }
 }
 
-/* ---- Basic safety check: patient allergy flag + duplicate/known interaction pairs.
-   TODO: replace with a real allergy/interaction service — this only demonstrates
-   the pattern (warn, don't block) using the mock allergyGroup / INTERACTION_PAIRS data. */
 const safetyWarnings = computed(() => {
   const warnings = []
   const brands = rx.drugs.map(d => d.brand).filter(Boolean)
@@ -291,10 +270,6 @@ const safetyWarnings = computed(() => {
   return warnings
 })
 
-/* =====================================================================
-   AI-suggested drugs based on entered diagnoses (simple keyword match here;
-   swap for a real AI/API call — e.g. POST /api/suggest-drugs { diagnoses }).
-===================================================================== */
 const suggestedBrands = computed(() => {
   const text = dx.diagnoses.join(' ')
   const found = new Set()
@@ -333,10 +308,6 @@ watch(() => patient.date, recalcFollowUpDate)
 function onFollowUpDateInput() { followUpManuallyEdited.value = true }
 recalcFollowUpDate() // seed initial value
 
-/* =====================================================================
-   9. Draft autosave (localStorage) — swap for a Pinia "drafts" store if
-   you want drafts to sync across devices instead of staying per-browser.
-===================================================================== */
 const DRAFT_KEY = 'careconnect_rx_draft_v1'
 const showDraftBanner = ref(false)
 
@@ -346,8 +317,7 @@ function serializeDraft() {
 function saveDraft() {
   try { localStorage.setItem(DRAFT_KEY, serializeDraft()) } catch (e) { /* storage full/unavailable — ignore */ }
 }
-// Debounced so typing doesn't trigger a localStorage write on every keystroke —
-// waits until 600ms of inactivity, which keeps low-end tablets responsive.
+
 let draftSaveTimer = null
 function scheduleDraftSave() {
   clearTimeout(draftSaveTimer)
@@ -369,7 +339,7 @@ function restoreDraft() {
     Object.assign(advice, d.advice)
     Object.assign(report, d.report)
     activeTab.value = d.activeTab || 'history'
-    followUpManuallyEdited.value = true // don't overwrite a restored date
+    followUpManuallyEdited.value = true
   } catch (e) { /* corrupt draft — ignore */ }
   showDraftBanner.value = false
 }
@@ -386,7 +356,7 @@ watch(
   { deep: true }
 )
 
-/* ---------------- Submit ---------------- */
+/* ---------------- Submit & Print ---------------- */
 function goBack() {
   router.push({ name: 'prescriptions' })
 }
@@ -411,12 +381,14 @@ function submitRx() {
     reports: report.entries.filter(r => r.name),
   }
 
-  // TODO: replace with a real API call / Pinia store action once the backend
-  // or a shared prescriptions store is wired up. For now this just confirms
-  // creation and returns to the list.
   ui.toast({ type: 'success', title: 'Prescription created', message: `${id} issued to ${patient.name || 'patient'}.` })
   clearDraft()
-  router.push({ name: 'prescriptions' })
+
+  // Open native print dialog
+  nextTick(() => {
+    window.print()
+    router.push({ name: 'prescriptions' })
+  })
 }
 </script>
 
@@ -441,6 +413,7 @@ function submitRx() {
         </div>
         <div class="flex items-center gap-3">
           <BaseButton variant="outline" @click="goBack">Cancel</BaseButton>
+          <BaseButton variant="outline" @click="showPreview = true">Preview</BaseButton>
           <BaseButton @click="submitRx">Save &amp; Print</BaseButton>
         </div>
       </div>
@@ -639,7 +612,7 @@ function submitRx() {
             </button>
           </div>
 
-          <!-- Safety warnings: allergy flag / known interaction pairs (illustrative — not a real drug safety engine) -->
+          <!-- Safety warnings -->
           <div v-if="safetyWarnings.length" class="mt-4 space-y-2">
             <div v-for="(w, wi) in safetyWarnings" :key="wi"
               class="flex items-start gap-2.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl px-4 py-3">
@@ -802,7 +775,6 @@ function submitRx() {
               <tbody>
                 <tr v-for="(r, i) in report.entries" :key="i" class="bg-meridian-50 dark:bg-white/5">
                   <td class="px-3.5 py-3 border-t border-b border-meridian-100 dark:border-white/10 rounded-l-lg"><input v-model="r.name" type="text" placeholder="e.g. CBC" class="w-full bg-transparent outline-none font-semibold text-sm text-meridian-900 dark:text-white" /></td>
-                  <!-- native date input instead of free-text dd-mm-yyyy -->
                   <td class="px-3.5 py-3 border-t border-b border-meridian-100 dark:border-white/10"><input v-model="r.date" type="date" class="w-full bg-transparent outline-none text-sm text-meridian-900 dark:text-white" /></td>
                   <td class="px-3.5 py-3 border-t border-b border-meridian-100 dark:border-white/10"><input v-model="r.result" type="text" placeholder="Result" class="w-full bg-transparent outline-none text-sm text-meridian-900 dark:text-white" /></td>
                   <td class="px-3.5 py-3 border-t border-b border-meridian-100 dark:border-white/10"><input v-model="r.unit" type="text" placeholder="Unit" class="w-full bg-transparent outline-none text-sm text-meridian-900 dark:text-white" /></td>
@@ -816,5 +788,112 @@ function submitRx() {
 
       </div>
     </div>
+
+    <!-- Prescription Preview Modal -->
+    <BaseModal v-model="showPreview" title="Prescription Preview" size="lg">
+      <div class="bg-white text-gray-800 p-6 border rounded-xl font-sans text-sm space-y-6">
+        
+        <!-- Doctor Info (Header) -->
+        <div class="flex justify-between items-start border-b pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-pulse-600">{{ auth.user?.name || 'Dr. Marcus Reyes' }}</h2>
+            <p class="text-xs text-gray-500">MBBS, FCPS, MD (Internal Medicine)</p>
+            <p class="text-xs text-gray-500">Specialist Physician</p>
+          </div>
+          <div class="text-right text-xs text-gray-500">
+            <p class="font-semibold text-gray-700">CareConnect Hospital</p>
+            <p>Phone: +880 1700-000000</p>
+          </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-lg text-xs font-medium border">
+          <div><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
+          <div><span class="text-gray-500">Age / Sex:</span> {{ patient.age || '—' }} / {{ patient.sex || '—' }}</div>
+          <div><span class="text-gray-500">Reg No:</span> {{ patient.regNo || '—' }}</div>
+          <div><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
+        </div>
+
+        <!-- Body Layout (Left: Clinical Notes, Right: Rx) -->
+        <div class="grid grid-cols-12 gap-6 min-h-[300px]">
+          
+          <!-- Left Column (Complaints, Vitals, Diagnoses, Tests) -->
+          <div class="col-span-4 border-r pr-4 space-y-4 text-xs">
+            <!-- C/C -->
+            <div v-if="history.complaints.some(c => c.text)">
+              <h4 class="font-bold uppercase text-gray-700 text-[11px]">C/C:</h4>
+              <ul class="list-disc list-inside text-gray-600 pl-1">
+                <li v-for="(c, i) in history.complaints.filter(c => c.text)" :key="i">
+                  {{ c.text }} <span v-if="c.duration">({{ c.duration }})</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- O/E (Vitals) -->
+            <div v-if="Object.values(vitals).some(v => v)">
+              <h4 class="font-bold uppercase text-gray-700 text-[11px]">O/E:</h4>
+              <div class="space-y-0.5 text-gray-600 pl-1">
+                <p v-if="vitals.bp">BP: {{ vitals.bp }} mmHg</p>
+                <p v-if="vitals.pulse">Pulse: {{ vitals.pulse }} b/m</p>
+                <p v-if="vitals.temp">Temp: {{ vitals.temp }} °F</p>
+                <p v-if="vitals.spo2">SpO2: {{ vitals.spo2 }}%</p>
+                <p v-if="vitals.rbs">RBS: {{ vitals.rbs }} mmol/L</p>
+              </div>
+            </div>
+
+            <!-- Dx -->
+            <div v-if="dx.diagnoses.some(d => d)">
+              <h4 class="font-bold uppercase text-gray-700 text-[11px]">Dx:</h4>
+              <ul class="list-disc list-inside text-gray-600 pl-1">
+                <li v-for="(d, i) in dx.diagnoses.filter(Boolean)" :key="i">{{ d }}</li>
+              </ul>
+            </div>
+
+            <!-- Investigations / Reports -->
+            <div v-if="report.entries.some(r => r.name)">
+              <h4 class="font-bold uppercase text-gray-700 text-[11px]">Tests / Reports:</h4>
+              <ul class="list-disc list-inside text-gray-600 pl-1">
+                <li v-for="(r, i) in report.entries.filter(r => r.name)" :key="i">
+                  {{ r.name }} <span v-if="r.result">- {{ r.result }} {{ r.unit }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right Column (Rx Medicines & Advice) -->
+          <div class="col-span-8 space-y-6">
+            <h3 class="text-xl font-bold font-serif text-gray-900">Rx</h3>
+
+            <!-- Medicines -->
+            <div class="space-y-3">
+              <div v-for="(d, i) in rx.drugs.filter(d => d.brand)" :key="i" class="text-xs">
+                <div class="font-bold text-gray-900 text-sm">{{ i + 1 }}. {{ d.brand }}</div>
+                <div class="text-gray-600 pl-4 mt-0.5">
+                  <span>{{ d.dose }}</span> 
+                  <span v-if="d.instruction"> — {{ d.instruction }}</span>
+                  <span v-if="d.duration"> ({{ d.duration }})</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advice -->
+            <div v-if="advice.notes.some(a => a)" class="pt-4 border-t text-xs">
+              <h4 class="font-bold uppercase text-gray-700 mb-1">Advice:</h4>
+              <ul class="list-disc list-inside text-gray-600 space-y-0.5 pl-1">
+                <li v-for="(a, i) in advice.notes.filter(Boolean)" :key="i">{{ a }}</li>
+              </ul>
+            </div>
+
+            <!-- Follow up -->
+            <div v-if="advice.followUp.date" class="text-xs font-semibold text-gray-700 pt-2">
+              Next Visit: {{ advice.followUp.date }} ({{ advice.followUp.interval }})
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </BaseModal>
+
   </DashboardLayout>
 </template>
