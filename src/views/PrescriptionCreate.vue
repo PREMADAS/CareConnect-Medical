@@ -394,10 +394,10 @@ function submitRx() {
 
 <template>
   <DashboardLayout>
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-5xl mx-auto px-3 sm:px-4 lg:px-0">
 
       <!-- Draft restore banner -->
-      <div v-if="showDraftBanner" class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-pulse-200 bg-pulse-50 dark:bg-pulse-500/10 dark:border-pulse-500/30 px-4 py-3">
+      <div v-if="showDraftBanner" class="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-pulse-200 bg-pulse-50 dark:bg-pulse-500/10 dark:border-pulse-500/30 px-4 py-3">
         <p class="text-sm text-meridian-700 dark:text-meridian-200">You have an unsaved prescription draft. Restore it?</p>
         <div class="flex items-center gap-2 shrink-0">
           <button type="button" @click="dismissDraft" class="text-xs font-semibold text-meridian-400 hover:text-meridian-600 px-2 py-1">Discard</button>
@@ -406,12 +406,12 @@ function submitRx() {
       </div>
 
       <!-- Top bar -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="font-display text-2xl font-semibold text-meridian-900 dark:text-white">New prescription</h1>
           <p class="text-sm text-meridian-500 dark:text-meridian-400 mt-1">Fill in each step, then save.</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="grid grid-cols-3 sm:flex sm:items-center gap-2 sm:gap-3">
           <BaseButton variant="outline" @click="goBack">Cancel</BaseButton>
           <BaseButton variant="outline" @click="showPreview = true">Preview</BaseButton>
           <BaseButton @click="submitRx">Save &amp; Print</BaseButton>
@@ -419,7 +419,7 @@ function submitRx() {
       </div>
 
       <!-- Patient identity -->
-      <div class="rounded-2xl border border-meridian-100 dark:border-white/10 bg-white dark:bg-white/5 p-6 shadow-sm">
+      <div class="rounded-2xl border border-meridian-100 dark:border-white/10 bg-white dark:bg-white/5 p-4 sm:p-6 shadow-sm">
 
         <!-- 3. Patient search / lookup -->
         <div class="relative mb-5">
@@ -504,7 +504,7 @@ function submitRx() {
       </div>
 
       <!-- Content -->
-      <div class="rounded-b-2xl border border-t-0 border-meridian-100 dark:border-white/10 bg-white dark:bg-meridian-900 p-7 shadow-sm">
+      <div class="rounded-b-2xl border border-t-0 border-meridian-100 dark:border-white/10 bg-white dark:bg-meridian-900 p-4 sm:p-7 shadow-sm">
 
         <!-- 1. History -->
         <div v-show="activeTab === 'history'">
@@ -512,10 +512,12 @@ function submitRx() {
           <p class="text-sm text-meridian-400 mt-1 mb-5">Chief complaints and background conditions</p>
 
           <div class="text-xs font-bold uppercase tracking-wide text-pulse-600 mb-3">C/C — প্রধান সমস্যা</div>
-          <div v-for="(c, i) in history.complaints" :key="i" class="flex items-center gap-3 bg-meridian-50 dark:bg-white/5 border border-meridian-100 dark:border-white/10 rounded-xl px-4 py-3 mb-2.5">
-            <input v-model="c.text" type="text" placeholder="যেমন — জ্বর, ৩ দিন যাবৎ" class="flex-1 bg-transparent outline-none text-sm text-meridian-900 dark:text-white" />
-            <input v-model="c.duration" type="text" placeholder="duration" class="w-24 shrink-0 text-xs font-mono font-semibold text-pulse-600 bg-pulse-50 dark:bg-pulse-500/10 rounded-full px-3 py-1 outline-none text-center" />
-            <button type="button" @click="removeComplaint(i)" class="w-6 h-6 flex items-center justify-center rounded-full text-meridian-400 hover:bg-pulse-50 hover:text-pulse-500 shrink-0">✕</button>
+          <div v-for="(c, i) in history.complaints" :key="i" class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-meridian-50 dark:bg-white/5 border border-meridian-100 dark:border-white/10 rounded-xl px-4 py-3 mb-2.5">
+            <input v-model="c.text" type="text" placeholder="যেমন — জ্বর, ৩ দিন যাবৎ" class="flex-1 w-full bg-transparent outline-none text-sm text-meridian-900 dark:text-white" />
+            <div class="flex items-center gap-3 shrink-0">
+              <input v-model="c.duration" type="text" placeholder="duration" class="w-24 shrink-0 text-xs font-mono font-semibold text-pulse-600 bg-pulse-50 dark:bg-pulse-500/10 rounded-full px-3 py-1 outline-none text-center" />
+              <button type="button" @click="removeComplaint(i)" class="w-6 h-6 flex items-center justify-center rounded-full text-meridian-400 hover:bg-pulse-50 hover:text-pulse-500 shrink-0">✕</button>
+            </div>
           </div>
           <button type="button" @click="addComplaint" class="w-full text-center py-3 border-1.5 border-dashed border-meridian-200 dark:border-white/15 rounded-xl text-pulse-600 text-sm font-semibold hover:bg-meridian-50">+ Add complaint</button>
 
@@ -621,8 +623,8 @@ function submitRx() {
             </div>
           </div>
 
-          <div class="overflow-x-auto mt-5">
-            <table class="w-full border-separate" style="border-spacing: 0 8px;">
+          <div class="overflow-x-auto mt-5 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table class="w-full min-w-[680px] border-separate" style="border-spacing: 0 8px;">
               <thead>
                 <tr class="text-[10.5px] uppercase tracking-wide text-meridian-400 font-bold">
                   <th class="text-left px-3.5 pb-1">No.</th>
@@ -697,7 +699,7 @@ function submitRx() {
           <h2 class="font-display text-lg font-semibold text-meridian-900 dark:text-white">Advice &amp; Follow-up</h2>
           <p class="text-sm text-meridian-400 mt-1 mb-5">উপদেশ ও পরবর্তী সাক্ষাতের তথ্য</p>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-9">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-9">
             <div>
               <div class="text-xs font-bold uppercase tracking-wide text-pulse-600 mb-3.5">উপদেশ</div>
               <div v-for="(a, i) in advice.notes" :key="i" class="flex items-center gap-3 bg-meridian-50 dark:bg-white/5 border border-meridian-100 dark:border-white/10 rounded-xl px-4 py-3 mb-2.5">
@@ -761,8 +763,8 @@ function submitRx() {
           <h2 class="font-display text-lg font-semibold text-meridian-900 dark:text-white">Report Entry</h2>
           <p class="text-sm text-meridian-400 mt-1 mb-5">Lab / investigation results</p>
 
-          <div class="overflow-x-auto">
-            <table class="w-full border-separate" style="border-spacing: 0 8px;">
+          <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table class="w-full min-w-[560px] border-separate" style="border-spacing: 0 8px;">
               <thead>
                 <tr class="text-[10.5px] uppercase tracking-wide text-meridian-400 font-bold">
                   <th class="text-left px-3.5 pb-1">Report name</th>
@@ -791,23 +793,31 @@ function submitRx() {
 
     <!-- Prescription Preview Modal -->
     <BaseModal v-model="showPreview" title="Prescription Preview" size="lg">
-      <div class="bg-white text-gray-800 p-6 border rounded-xl font-sans text-sm space-y-6">
+      <div class="bg-white text-gray-800 p-4 sm:p-6 border rounded-xl font-sans text-sm space-y-6">
         
         <!-- Doctor Info (Header) -->
-        <div class="flex justify-between items-start border-b pb-4">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 border-b pb-4">
           <div>
             <h2 class="text-xl font-bold text-pulse-600">{{ auth.user?.name || 'Dr. Marcus Reyes' }}</h2>
             <p class="text-xs text-gray-500">MBBS, FCPS, MD (Internal Medicine)</p>
             <p class="text-xs text-gray-500">Specialist Physician</p>
           </div>
-          <div class="text-right text-xs text-gray-500">
-            <p class="font-semibold text-gray-700">CareConnect Hospital</p>
-            <p>Phone: +880 1700-000000</p>
+          <div class="flex items-center gap-3 sm:flex-row-reverse">
+            <div class="w-12 h-12 rounded-lg border border-gray-100 bg-pulse-50 flex items-center justify-center text-pulse-600 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9 9h1" /><path d="M14 9h1" /><path d="M9 13h1" /><path d="M14 13h1" /><path d="M10 21v-4h4v4" />
+              </svg>
+            </div>
+            <div class="text-left sm:text-right text-xs text-gray-500">
+              <p class="font-semibold text-gray-700">{{ auth.user?.hospital?.name || 'CareConnect Hospital' }}</p>
+              <p v-if="auth.user?.hospital?.address">{{ auth.user.hospital.address }}</p>
+              <p>Phone: {{ auth.user?.hospital?.phone || '+880 1700-000000' }}</p>
+            </div>
           </div>
         </div>
 
         <!-- Patient Info -->
-        <div class="grid grid-cols-5 gap-2 bg-gray-50 p-3 rounded-lg text-xs font-medium border">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-gray-50 p-3 rounded-lg text-xs font-medium border">
           <div><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
           <div><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
           <div><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
@@ -816,10 +826,10 @@ function submitRx() {
         </div>
 
         <!-- Body Layout (Left: Clinical Notes, Right: Rx) -->
-        <div class="grid grid-cols-12 gap-6 min-h-[300px]">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:min-h-[300px]">
           
           <!-- Left Column (Complaints, Vitals, Diagnoses, Tests) -->
-          <div class="col-span-4 border-r pr-4 space-y-4 text-xs">
+          <div class="sm:col-span-4 border-b sm:border-b-0 sm:border-r pb-4 sm:pb-0 sm:pr-4 space-y-4 text-xs">
             <!-- C/C -->
             <div v-if="history.complaints.some(c => c.text)">
               <h4 class="font-bold uppercase text-gray-700 text-[11px]">C/C:</h4>
@@ -862,7 +872,7 @@ function submitRx() {
           </div>
 
           <!-- Right Column (Rx Medicines & Advice) -->
-          <div class="col-span-8 space-y-6">
+          <div class="sm:col-span-8 space-y-6">
             <h3 class="text-xl font-bold font-serif text-gray-900">Rx</h3>
 
             <!-- Medicines -->
