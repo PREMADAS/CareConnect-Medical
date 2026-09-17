@@ -807,9 +807,10 @@ function submitRx() {
         </div>
 
         <!-- Patient Info -->
-        <div class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-lg text-xs font-medium border">
+        <div class="grid grid-cols-5 gap-2 bg-gray-50 p-3 rounded-lg text-xs font-medium border">
           <div><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
-          <div><span class="text-gray-500">Age / Sex:</span> {{ patient.age || '—' }} / {{ patient.sex || '—' }}</div>
+          <div><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
+          <div><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
           <div><span class="text-gray-500">Reg No:</span> {{ patient.regNo || '—' }}</div>
           <div><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
         </div>
