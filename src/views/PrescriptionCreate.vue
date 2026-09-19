@@ -1181,11 +1181,11 @@ function submitRx() {
     <!-- Prescription Preview Modal -->
         <!-- Prescription Preview Modal -->
     <BaseModal v-model="showPreview" title="Prescription Preview" size="lg">
-      <div class="bg-white text-gray-800 border border-gray-100 rounded-xl overflow-hidden font-sans text-sm shadow-sm flex flex-col max-h-[calc(100vh-12rem)]">
+     <div class="bg-white text-gray-800 border border-gray-100 rounded-xl overflow-hidden font-sans text-sm shadow-sm flex flex-col max-h-[calc(100dvh-8rem)] sm:max-h-[calc(100vh-12rem)] [overflow-wrap:anywhere]">
         <!-- Top accent bar -->
         <div class="h-1.5 bg-pulse-600 shrink-0"></div>
 
-        <div class="flex-1 min-h-0 overflow-y-auto p-5 sm:p-8 space-y-6">
+       <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-8 space-y-5 sm:space-y-6">
 
           <!-- Doctor + Hospital header -->
           <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 border-b border-gray-100 pb-5">
@@ -1209,7 +1209,7 @@ function submitRx() {
           </div>
 
           <!-- Patient info -->
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 bg-gray-50 px-4 py-3 rounded-lg text-xs font-medium border border-gray-100">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 bg-gray-50 px-4 py-3 rounded-lg text-xs font-medium border border-gray-100">
             <div><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
             <div><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
             <div><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
@@ -1297,7 +1297,7 @@ function submitRx() {
         </div>
 
         <!-- Company promotion footer -->
-        <div class="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-5 sm:px-8 py-3 bg-pulse-50 border-t border-gray-100">
+       <div class="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 px-4 sm:px-8 py-2.5 sm:py-3 bg-pulse-50 border-t border-gray-100">
           <div class="flex items-center gap-2.5">
             <div class="w-7 h-7 rounded-md bg-white border border-gray-100 flex items-center justify-center text-pulse-600 shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1306,7 +1306,7 @@ function submitRx() {
             </div>
             <div class="leading-tight">
               <p class="text-[11px] font-semibold text-gray-700">Issued digitally via CareConnect</p>
-              <p class="text-[10px] text-gray-500">Smart healthcare management platform</p>
+              <p class="hidden sm:block text-[10px] text-gray-500">Smart healthcare management platform</p>
             </div>
           </div>
           <p class="text-[11px] text-gray-500 sm:text-right">
