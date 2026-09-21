@@ -909,8 +909,8 @@ function submitRx() {
                   v-model="selectedTemplate" aria-label="Prescription template"
                   class="text-xs font-semibold border border-meridian-100 dark:border-white/10 rounded-lg px-3 py-2 bg-meridian-50 dark:bg-white/5 outline-none transition-colors focus:border-pulse-400"
                 >
-                  <option value="" disabled>Apply template…</option>
-                  <option v-for="t in TEMPLATES" :key="t.name" :value="t.name">{{ t.name }}</option>
+                   <option value="" disabled class="bg-white text-gray-500">Apply template…</option>
+                  <option v-for="t in TEMPLATES" :key="t.name" :value="t.name" class="bg-white text-black">{{ t.name }}</option>
                 </select>
                 <button
                   type="button" @click="applyTemplate" :disabled="!selectedTemplate"
