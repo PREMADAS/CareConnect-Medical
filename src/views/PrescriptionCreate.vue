@@ -1214,6 +1214,7 @@ function submitRx() {
             <div class="min-w-0"><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Reg No:</span> {{ patient.regNo || '—' }}</div>
+            <div class="min-w-0"><span class="text-gray-500">Weight:</span> {{ patient.weight ? patient.weight + ' kg' : '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
           </div>
 
