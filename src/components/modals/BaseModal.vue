@@ -28,22 +28,23 @@ watch(
     <transition name="modal-fade">
       <div
         v-if="modelValue"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden"
         role="dialog"
         aria-modal="true"
         :aria-label="title"
       >
         <div class="absolute inset-0 bg-meridian-950/50 backdrop-blur-sm" @click="close" />
         <div
-          class="relative w-full glass-panel p-6 animate-scale-in"
+          class="relative w-full min-w-0 glass-panel p-4 sm:p-6 animate-scale-in max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden"
           :class="sizes[size]"
+          style="width: 100%; min-width: 0; box-sizing: border-box;"
         >
-          <div class="flex items-start justify-between mb-4">
-            <h3 class="text-lg font-display font-semibold text-meridian-900 dark:text-white">{{ title }}</h3>
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <h3 class="min-w-0 text-lg font-display font-semibold text-meridian-900 dark:text-white">{{ title }}</h3>
             <button
               @click="close"
               aria-label="Close dialog"
-              class="rounded-lg p-1.5 text-meridian-400 hover:bg-meridian-100 dark:hover:bg-white/10 btn-focus-ring"
+              class="shrink-0 rounded-lg p-1.5 text-meridian-400 hover:bg-meridian-100 dark:hover:bg-white/10 btn-focus-ring"
             >
               <XMarkIcon class="h-5 w-5" />
             </button>

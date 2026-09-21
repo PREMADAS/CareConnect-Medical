@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick, h } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick, h } from 'vue'
 import { useRouter } from 'vue-router'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -1181,26 +1181,26 @@ function submitRx() {
     <!-- Prescription Preview Modal -->
         <!-- Prescription Preview Modal -->
     <BaseModal v-model="showPreview" title="Prescription Preview" size="lg">
-     <div class="bg-white text-gray-800 border border-gray-100 rounded-xl overflow-hidden font-sans text-sm shadow-sm flex flex-col max-h-[calc(100dvh-8rem)] sm:max-h-[calc(100vh-12rem)] [overflow-wrap:anywhere]">
+     <div class="w-full max-w-full bg-white text-gray-800 border border-gray-100 rounded-xl overflow-hidden font-sans text-sm shadow-sm flex flex-col max-h-[calc(100dvh-8rem)] sm:max-h-[calc(100vh-12rem)] [overflow-wrap:anywhere]">
         <!-- Top accent bar -->
         <div class="h-1.5 bg-pulse-600 shrink-0"></div>
 
-       <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-8 space-y-5 sm:space-y-6">
+       <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 sm:p-8 space-y-5 sm:space-y-6">
 
           <!-- Doctor + Hospital header -->
           <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 border-b border-gray-100 pb-5">
-            <div>
+           <div class="min-w-0">
               <h2 class="text-xl font-bold tracking-tight text-pulse-600">{{ auth.user?.name || 'Dr. Marcus Reyes' }}</h2>
               <p class="text-xs text-gray-500 mt-1">MBBS, FCPS, MD (Internal Medicine)</p>
               <p class="text-xs text-gray-500">Specialist Physician</p>
             </div>
-            <div class="flex items-center gap-3 sm:flex-row-reverse">
+            <div class="flex items-center gap-3 min-w-0 sm:flex-row-reverse">
               <div class="w-12 h-12 rounded-lg border border-gray-100 bg-pulse-50 flex items-center justify-center text-pulse-600 shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9 9h1" /><path d="M14 9h1" /><path d="M9 13h1" /><path d="M14 13h1" /><path d="M10 21v-4h4v4" />
                 </svg>
               </div>
-              <div class="text-left sm:text-right text-xs text-gray-500 leading-relaxed">
+              <div class="min-w-0 text-left sm:text-right text-xs text-gray-500 leading-relaxed">
                 <p class="font-semibold text-gray-700">{{ auth.user?.hospital?.name || 'CareConnect Hospital' }}</p>
                 <p v-if="auth.user?.hospital?.address">{{ auth.user.hospital.address }}</p>
                 <p>Phone: {{ auth.user?.hospital?.phone || '+880 1700-000000' }}</p>
@@ -1210,18 +1210,18 @@ function submitRx() {
 
           <!-- Patient info -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 bg-gray-50 px-4 py-3 rounded-lg text-xs font-medium border border-gray-100">
-            <div><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
-            <div><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
-            <div><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
-            <div><span class="text-gray-500">Reg No:</span> {{ patient.regNo || '—' }}</div>
-            <div><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
+            <div class="min-w-0 col-span-2 sm:col-span-1"><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
+            <div class="min-w-0"><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
+            <div class="min-w-0"><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
+            <div class="min-w-0"><span class="text-gray-500">Reg No:</span> {{ patient.regNo || '—' }}</div>
+            <div class="min-w-0"><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
           </div>
 
           <!-- Body (Left: clinical notes, Right: Rx) -->
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:min-h-[320px]">
 
             <!-- Left column -->
-            <div class="sm:col-span-4 border-b sm:border-b-0 sm:border-r border-gray-100 pb-5 sm:pb-0 sm:pr-5 space-y-5 text-xs">
+            <div class="min-w-0 sm:col-span-4 border-b sm:border-b-0 sm:border-r border-gray-100 pb-5 sm:pb-0 sm:pr-5 space-y-5 text-xs">
               <div v-if="history.complaints.some(c => c.text)">
                 <h4 class="font-bold uppercase tracking-wide text-gray-700 text-[11px] mb-1.5">C/C</h4>
                 <ul class="list-disc pl-4 space-y-0.5 text-gray-600">
@@ -1260,7 +1260,7 @@ function submitRx() {
             </div>
 
             <!-- Right column -->
-            <div class="sm:col-span-8 flex flex-col gap-6">
+            <div class="min-w-0 sm:col-span-8 flex flex-col gap-6">
               <h3 class="text-2xl font-bold font-serif text-gray-900">Rx</h3>
 
               <div class="space-y-4">
