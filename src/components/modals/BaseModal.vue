@@ -41,13 +41,16 @@ watch(
         >
           <div class="flex items-start justify-between gap-3 mb-4">
             <h3 class="min-w-0 text-lg font-display font-semibold text-meridian-900 dark:text-white">{{ title }}</h3>
-            <button
-              @click="close"
-              aria-label="Close dialog"
-              class="shrink-0 rounded-lg p-1.5 text-meridian-400 hover:bg-meridian-100 dark:hover:bg-white/10 btn-focus-ring"
-            >
-              <XMarkIcon class="h-5 w-5" />
-            </button>
+            <div class="flex items-center gap-2 shrink-0">
+              <slot name="actions" />
+              <button
+                @click="close"
+                aria-label="Close dialog"
+                class="shrink-0 rounded-lg p-1.5 text-meridian-400 hover:bg-meridian-100 dark:hover:bg-white/10 btn-focus-ring"
+              >
+                <XMarkIcon class="h-5 w-5" />
+              </button>
+            </div>
           </div>
           <slot />
         </div>

@@ -1180,8 +1180,24 @@ function submitRx() {
 
     <!-- Prescription Preview Modal -->
         <!-- Prescription Preview Modal -->
-    <BaseModal v-model="showPreview" title="Prescription Preview" size="lg">
-     <div class="w-full max-w-full bg-white text-gray-800 border border-gray-100 rounded-xl overflow-hidden font-sans text-sm shadow-sm flex flex-col max-h-[calc(100dvh-8rem)] sm:max-h-[calc(100vh-12rem)] [overflow-wrap:anywhere]">
+    <BaseModal v-model="showPreview" title="Prescription Preview" size="xl">
+      <template #actions>
+    <button
+      type="button"
+      @click="submitRx"
+      class="text-xs sm:text-sm font-semibold text-white bg-pulse-500 hover:bg-pulse-600 rounded-lg px-3.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400"
+    >
+      Save
+    </button>
+    <button
+      type="button"
+      @click="window.print()"
+      class="text-xs sm:text-sm font-semibold text-pulse-600 border border-pulse-300 hover:bg-pulse-50 rounded-lg px-3.5 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400"
+    >
+      Print
+    </button>
+  </template>
+ <div class="w-full max-w-5xl mx-auto bg-white text-gray-800 border border-gray-100 rounded-xl overflow-hidden font-sans text-sm shadow-sm flex flex-col max-h-[calc(100dvh-4rem)] sm:max-h-[calc(100vh-6rem)] [overflow-wrap:anywhere]">
         <!-- Top accent bar -->
         <div class="h-1.5 bg-pulse-600 shrink-0"></div>
 
