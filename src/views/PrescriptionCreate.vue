@@ -350,7 +350,16 @@ const patient = reactive({
   name: '', age: '', sex: '', regNo: '', weight: '', mobile: '',
   date: new Date().toISOString().slice(0, 10),
 })
-const matchedPatient = ref(null) // set when a PATIENT_DB record is selected
+const matchedPatient = ref(null)
+
+// TODO: replace with auth.user?.licensedHospitals from doctor profile
+const DOCTOR_HOSPITALS = [
+  { name: 'CareConnect Hospital', address: 'Chattogram', phone: '+880 1700-000000' },
+  { name: 'Apollo Diagnostic Center', address: 'Dhaka', phone: '+880 1811-222333' },
+  { name: 'Popular Medical College Hospital', address: 'Dhaka', phone: '+880 1922-444555' },
+]
+
+const selectedHospital = ref(DOCTOR_HOSPITALS[0]) // set when a PATIENT_DB record is selected
 
 const backgroundOptions = ['HTN', 'DM', 'Asthma', 'COPD', 'IHD', 'CKD', 'CLD', 'CVD', 'Smoking', 'Leukaemia', 'Malignancy', 'Allergy']
 const history = reactive({
@@ -1203,23 +1212,50 @@ function submitRx() {
 
        <div class="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden overscroll-contain p-4 sm:p-8 space-y-5 sm:space-y-6">
 
-          <!-- Doctor + Hospital header -->
+       
+                  <!-- Doctor + Hospital header -->
           <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 border-b border-gray-100 pb-5">
            <div class="min-w-0">
               <h2 class="text-xl font-bold tracking-tight text-pulse-600">{{ auth.user?.name || 'Dr. Marcus Reyes' }}</h2>
-              <p class="text-xs text-gray-500 mt-1">MBBS, FCPS, MD (Internal Medicine)</p>
+
+              <!-- TODO: replace with auth.user?.degrees (array of { degree, institute }) from doctor profile -->
+              <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+                MBBS <span class="text-gray-400">(Dhaka Medical College)</span><br/>
+                FCPS <span class="text-gray-400">(BSMMU)</span>
+                MD (Internal Medicine) <span class="text-gray-400">(BSMMU)</span>
+              </p>
+
               <p class="text-xs text-gray-500">Specialist Physician</p>
-            </div>
-            <div class="flex items-center gap-3 min-w-0 sm:flex-row-reverse">
-              <div class="w-12 h-12 rounded-lg border border-gray-100 bg-pulse-50 flex items-center justify-center text-pulse-600 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9 9h1" /><path d="M14 9h1" /><path d="M9 13h1" /><path d="M14 13h1" /><path d="M10 21v-4h4v4" />
-                </svg>
+
+              <!-- TODO: replace with auth.user?.chambers (array of hospital/chamber names) from doctor profile -->
+              <div class="mt-1.5 text-[11px] text-gray-500 leading-relaxed">
+                <span class="font-semibold text-gray-600">Chamber:</span>
+                CareConnect Hospital, Chattogram
+                <span class="mx-1 text-gray-300">•</span>
+                Apollo Diagnostic Center, Dhaka
               </div>
+            </div>
+            <div class="flex items-start gap-3 min-w-0 sm:flex-row-reverse">
+              <!-- Hospital icon — doubles as a dropdown trigger to switch chamber -->
+              <div class="relative shrink-0">
+                <select
+                  v-model="selectedHospital"
+                  aria-label="Select hospital / chamber"
+                  class="absolute inset-0 w-12 h-12 opacity-0 cursor-pointer"
+                >
+                  <option v-for="h in DOCTOR_HOSPITALS" :key="h.name" :value="h">{{ h.name }}</option>
+                </select>
+                <div class="w-12 h-12 rounded-lg border border-gray-100 bg-pulse-50 flex items-center justify-center text-pulse-600 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9 9h1" /><path d="M14 9h1" /><path d="M9 13h1" /><path d="M14 13h1" /><path d="M10 21v-4h4v4" />
+                  </svg>
+                </div>
+              </div>
+
               <div class="min-w-0 text-left sm:text-right text-xs text-gray-500 leading-relaxed">
-                <p class="font-semibold text-gray-700">{{ auth.user?.hospital?.name || 'CareConnect Hospital' }}</p>
-                <p v-if="auth.user?.hospital?.address">{{ auth.user.hospital.address }}</p>
-                <p>Phone: {{ auth.user?.hospital?.phone || '+880 1700-000000' }}</p>
+                <p class="font-semibold text-gray-700">{{ selectedHospital.name }}</p>
+                <p v-if="selectedHospital.address">{{ selectedHospital.address }}</p>
+                <p>Phone: {{ selectedHospital.phone }}</p>
               </div>
             </div>
           </div>
