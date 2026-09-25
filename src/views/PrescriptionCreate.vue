@@ -357,6 +357,7 @@ const DOCTOR_HOSPITALS = [
   { name: 'CareConnect Hospital', address: 'Chattogram', phone: '+880 1700-000000' },
   { name: 'Apollo Diagnostic Center', address: 'Dhaka', phone: '+880 1811-222333' },
   { name: 'Popular Medical College Hospital', address: 'Dhaka', phone: '+880 1922-444555' },
+  {name: 'Own Chember', address:'Dhaka', phone:'+8801784635904'}
 ]
 
 const selectedHospital = ref(DOCTOR_HOSPITALS[0]) // set when a PATIENT_DB record is selected
@@ -1261,13 +1262,13 @@ function submitRx() {
           </div>
 
           <!-- Patient info -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 bg-gray-50 px-4 py-3 rounded-lg text-xs font-medium border border-gray-100">
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-x-4 gap-y-2 bg-gray-50 px-4 py-3 rounded-lg text-xs font-medium border border-gray-100">
             <div class="min-w-0 col-span-2 sm:col-span-1"><span class="text-gray-500">Name:</span> {{ patient.name || '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Age:</span> {{ patient.age || '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Sex:</span> {{ patient.sex || '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Reg No:</span> {{ patient.regNo || '—' }}</div>
             <div class="min-w-0"><span class="text-gray-500">Weight:</span> {{ patient.weight ? patient.weight + ' kg' : '—' }}</div>
-            <div class="min-w-0"><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
+            <div class="min-w-0 whitespace-nowrap"><span class="text-gray-500">Date:</span> {{ patient.date }}</div>
           </div>
 
           <!-- Body (Left: clinical notes, Right: Rx) -->
