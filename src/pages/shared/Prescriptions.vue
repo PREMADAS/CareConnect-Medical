@@ -57,7 +57,6 @@ const columns = computed(() => {
   const cols = [
     { key: 'id', label: 'Rx ID', sortable: true },
     { key: 'patient', label: 'Patient', sortable: true },
-    { key: 'medication', label: 'Medication' },
   ]
   // doctor already knows these are their own prescriptions; others still need the issuer
   if (auth.role !== 'doctor') cols.push({ key: 'doctor', label: 'Doctor', sortable: true })
@@ -107,10 +106,6 @@ function formatDate(value) {
   const d = new Date(value)
   if (isNaN(d)) return value
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function mainMedicine(row) {
-  return row.items?.[0] || null
 }
 
 function daysLeft(row) {
@@ -234,16 +229,6 @@ function goToCreate() {
             <p class="text-sm font-medium text-meridian-900 dark:text-white">{{ row.patient }}</p>
             <p v-if="patientMeta(row)" class="text-xs text-meridian-500">{{ patientMeta(row) }}</p>
           </div>
-        </div>
-      </template>
-
-      <template #cell-medication="{ row }">
-        <div v-if="mainMedicine(row)">
-          <p class="text-sm text-meridian-900 dark:text-white">
-            {{ mainMedicine(row).medicine }} {{ mainMedicine(row).dosage }}
-            <span v-if="row.items.length > 1" class="ml-1 text-xs text-meridian-500">+{{ row.items.length - 1 }} more</span>
-          </p>
-          <p class="text-xs text-meridian-500 mt-0.5">{{ mainMedicine(row).frequency }} · {{ mainMedicine(row).duration }}</p>
         </div>
       </template>
 
