@@ -17,7 +17,8 @@ import billingData from '@/data/billing.json'
 import expensesData from '@/data/expenses.json'
 import {
   BanknotesIcon, ClockIcon, ReceiptPercentIcon, ArrowTrendingDownIcon,
-  PlusIcon, ArrowDownTrayIcon,
+  PlusIcon, ArrowDownTrayIcon, MagnifyingGlassIcon, XMarkIcon,
+  CheckCircleIcon, ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
 
 const ui = useUiStore()
@@ -27,14 +28,22 @@ onMounted(() => setTimeout(() => (loading.value = false), 600))
 const invoices = ref(billingData)
 const expenses = ref(expensesData)
 
+/* ---------- helpers ---------- */
+function currency(v) {
+  return `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+const sum = (list, pick = (x) => x.amount) => list.reduce((s, x) => s + pick(x), 0)
+const pct = (v, t) => (t ? Math.round((v / t) * 100) : 0)
+function initials(name = '') {
+  return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('') || '?'
+}
+
+/* ---------- filters ---------- */
 const statusFilter = ref('')
 const typeFilter = ref('')
-const statusOptions = [
-  { label: 'All statuses', value: '' },
-  { label: 'Paid', value: 'paid' },
-  { label: 'Pending', value: 'pending' },
-  { label: 'Overdue', value: 'overdue' },
-]
+const search = ref('')
+const invoicesEl = ref(null)
+
 const typeOptions = [
   { label: 'All types', value: '' },
   { label: 'Consultation', value: 'Consultation' },
@@ -42,23 +51,59 @@ const typeOptions = [
   { label: 'Lab Test', value: 'Lab Test' },
 ]
 
-const filteredInvoices = computed(() =>
-  invoices.value.filter(
-    (i) => (!statusFilter.value || i.status === statusFilter.value) && (!typeFilter.value || i.type === typeFilter.value)
+const filteredInvoices = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  return invoices.value.filter(
+    (i) =>
+      (!statusFilter.value || i.status === statusFilter.value) &&
+      (!typeFilter.value || i.type === typeFilter.value) &&
+      (!q || i.id.toLowerCase().includes(q) || i.patient.toLowerCase().includes(q))
   )
-)
-
-const totalRevenue = computed(() => invoices.value.filter((i) => i.status === 'paid').reduce((s, i) => s + i.amount, 0))
-const pendingPayments = computed(() => invoices.value.filter((i) => i.status === 'pending' || i.status === 'overdue').reduce((s, i) => s + i.amount, 0))
-const consultationRevenue = computed(() => invoices.value.filter((i) => i.type === 'Consultation' && i.status === 'paid').reduce((s, i) => s + i.amount, 0))
-const medicineTestRevenue = computed(() => invoices.value.filter((i) => (i.type === 'Medicine' || i.type === 'Lab Test') && i.status === 'paid').reduce((s, i) => s + i.amount, 0))
-const totalExpenses = computed(() => expenses.value.reduce((s, e) => s + e.amount, 0))
-const netBalance = computed(() => totalRevenue.value - totalExpenses.value)
-
-function currency(v) {
-  return `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+})
+const filteredTotal = computed(() => sum(filteredInvoices.value))
+const hasFilters = computed(() => statusFilter.value || typeFilter.value || search.value)
+function clearFilters() {
+  statusFilter.value = ''
+  typeFilter.value = ''
+  search.value = ''
 }
 
+/* ---------- money summary ---------- */
+const paidInvoices = computed(() => invoices.value.filter((i) => i.status === 'paid'))
+const pendingList = computed(() => invoices.value.filter((i) => i.status === 'pending'))
+const overdueList = computed(() => invoices.value.filter((i) => i.status === 'overdue'))
+
+const totalRevenue = computed(() => sum(paidInvoices.value))
+const pendingAmount = computed(() => sum(pendingList.value))
+const overdueAmount = computed(() => sum(overdueList.value))
+const pendingPayments = computed(() => pendingAmount.value + overdueAmount.value)
+const totalBilled = computed(() => sum(invoices.value))
+const collectionRate = computed(() => pct(totalRevenue.value, totalBilled.value))
+
+const consultationRevenue = computed(() => sum(paidInvoices.value.filter((i) => i.type === 'Consultation')))
+const totalExpenses = computed(() => sum(expenses.value))
+const netBalance = computed(() => totalRevenue.value - totalExpenses.value)
+
+/* real revenue split by type (paid invoices only) */
+const revenueByType = computed(() =>
+  ['Consultation', 'Medicine', 'Lab Test'].map((t) => ({
+    label: t,
+    value: sum(paidInvoices.value.filter((i) => i.type === t)),
+  }))
+)
+
+/* status tabs with counts + amounts */
+const statusTabs = computed(() => [
+  { key: '', label: 'All', count: invoices.value.length, amount: totalBilled.value },
+  { key: 'paid', label: 'Paid', count: paidInvoices.value.length, amount: totalRevenue.value },
+  { key: 'pending', label: 'Pending', count: pendingList.value.length, amount: pendingAmount.value },
+  { key: 'overdue', label: 'Overdue', count: overdueList.value.length, amount: overdueAmount.value },
+])
+
+/* expenses with share bars */
+const maxExpense = computed(() => Math.max(...expenses.value.map((e) => e.amount), 1))
+
+/* ---------- table ---------- */
 const columns = [
   { key: 'id', label: 'Invoice ID', sortable: true },
   { key: 'patient', label: 'Patient', sortable: true },
@@ -70,16 +115,28 @@ const columns = [
 ]
 const statusTone = { paid: 'success', pending: 'warning', overdue: 'danger' }
 
+function reviewOverdue() {
+  statusFilter.value = 'overdue'
+  invoicesEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+/* ---------- create invoice ---------- */
 const createOpen = ref(false)
 const newInvoice = ref({ patient: '', type: 'Consultation', amount: '' })
 function createInvoice() {
+  const patient = newInvoice.value.patient.trim()
+  const amount = Number(newInvoice.value.amount)
+  if (!patient || !(amount > 0)) {
+    ui.toast({ type: 'error', title: 'Check the form', message: 'Enter a patient name and an amount greater than 0.' })
+    return
+  }
   const id = `inv_${2000 + invoices.value.length + 1}`
   invoices.value.unshift({
-    id, patient: newInvoice.value.patient, patientId: 'usr_new', doctor: '—', type: newInvoice.value.type,
-    amount: Number(newInvoice.value.amount), status: 'pending', date: '2026-08-07', method: '—',
+    id, patient, patientId: 'usr_new', doctor: '—', type: newInvoice.value.type,
+    amount, status: 'pending', date: new Date().toISOString().slice(0, 10), method: '—',
   })
   createOpen.value = false
-  ui.toast({ type: 'success', title: 'Invoice created', message: `${id} issued to ${newInvoice.value.patient}.` })
+  ui.toast({ type: 'success', title: 'Invoice created', message: `${id} issued to ${patient}.` })
   newInvoice.value = { patient: '', type: 'Consultation', amount: '' }
 }
 function markPaid(row) {
@@ -93,6 +150,7 @@ function exportReport() {
 
 <template>
   <DashboardLayout>
+    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
         <h1 class="font-display text-2xl font-semibold text-meridian-900 dark:text-white">Billing & Accounting</h1>
@@ -104,6 +162,63 @@ function exportReport() {
       </div>
     </div>
 
+    <!-- Overdue alert -->
+    <div
+      v-if="!loading && overdueList.length"
+      class="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-3"
+    >
+      <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+      <p class="text-sm text-red-800 dark:text-red-200">
+        <span class="font-semibold">{{ overdueList.length }} overdue {{ overdueList.length === 1 ? 'invoice' : 'invoices' }}</span>
+        totalling <span class="font-mono font-semibold">{{ currency(overdueAmount) }}</span> need attention.
+      </p>
+      <button type="button" @click="reviewOverdue" class="ml-auto text-sm font-semibold text-red-700 dark:text-red-300 hover:underline">
+        Review overdue →
+      </button>
+    </div>
+
+    <!-- Financial snapshot -->
+    <div v-if="loading" class="h-40 rounded-2xl bg-meridian-100 dark:bg-white/5 animate-pulse mb-6" />
+    <section
+      v-else
+      class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-meridian-900 via-meridian-800 to-meridian-600 p-6 sm:p-8 mb-6 text-white"
+    >
+      <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/5" />
+      <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <!-- Net balance -->
+        <div>
+          <div class="flex items-center gap-2 text-sm font-medium text-meridian-200">
+            Net balance
+            <span class="rounded-full bg-white/15 px-2 py-0.5 text-xs">{{ netBalance >= 0 ? 'Surplus' : 'Deficit' }}</span>
+          </div>
+          <div class="mt-2 text-4xl sm:text-5xl font-semibold font-mono tracking-tight tabular-nums">{{ currency(netBalance) }}</div>
+          <p class="mt-3 text-sm text-meridian-100 font-mono">
+            {{ currency(totalRevenue) }} revenue − {{ currency(totalExpenses) }} expenses
+          </p>
+        </div>
+
+        <!-- Collection rate -->
+        <div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-sm font-medium text-meridian-200">Collection rate</span>
+            <span class="text-2xl font-semibold tabular-nums">{{ collectionRate }}%</span>
+          </div>
+          <div class="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-white/15">
+            <div class="h-full rounded-full bg-white transition-all duration-500" :style="{ width: collectionRate + '%' }" />
+          </div>
+          <p class="mt-2 text-xs text-meridian-200">
+            <span class="font-mono">{{ currency(totalRevenue) }}</span> collected of
+            <span class="font-mono">{{ currency(totalBilled) }}</span> billed
+          </p>
+          <div class="mt-3 flex flex-wrap gap-2 text-xs">
+            <span class="rounded-full bg-white/10 px-2.5 py-1">Pending <span class="font-mono font-semibold">{{ currency(pendingAmount) }}</span></span>
+            <span class="rounded-full bg-[#ff6b5b]/25 px-2.5 py-1">Overdue <span class="font-mono font-semibold">{{ currency(overdueAmount) }}</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stat cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <template v-if="loading"><SkeletonCard v-for="i in 4" :key="i" /></template>
       <template v-else>
@@ -122,7 +237,8 @@ function exportReport() {
       </template>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
       <div class="lg:col-span-2">
         <ChartCard title="Revenue vs. expenses" subtitle="Last 6 months">
           <LineChart
@@ -134,45 +250,146 @@ function exportReport() {
           />
         </ChartCard>
       </div>
-      <ChartCard title="Revenue by category" subtitle="This month">
-        <DoughnutChart :labels="['Consultations','Medicine','Lab Tests']" :data="[consultationRevenue, medicineTestRevenue * 0.4, medicineTestRevenue * 0.6]" />
+      <ChartCard title="Revenue by category" subtitle="Paid invoices">
+        <DoughnutChart :labels="revenueByType.map((r) => r.label)" :data="revenueByType.map((r) => r.value)" />
+        <ul class="mt-4 space-y-2">
+          <li v-for="r in revenueByType" :key="r.label" class="flex items-center justify-between text-sm">
+            <span class="text-meridian-700 dark:text-meridian-200">{{ r.label }}</span>
+            <span class="font-mono text-meridian-900 dark:text-white">
+              {{ currency(r.value) }} <span class="text-xs text-meridian-400">· {{ pct(r.value, totalRevenue) }}%</span>
+            </span>
+          </li>
+        </ul>
       </ChartCard>
     </div>
 
-    <div class="card-base p-4 mb-2 flex flex-wrap items-center gap-3">
-      <h3 class="font-display font-semibold text-meridian-900 dark:text-white mr-auto">Invoices</h3>
-      <div class="w-40"><BaseSelect v-model="statusFilter" :options="statusOptions" placeholder="Status" /></div>
-      <div class="w-44"><BaseSelect v-model="typeFilter" :options="typeOptions" placeholder="Type" /></div>
-    </div>
-    <DataTable :columns="columns" :rows="filteredInvoices" :loading="loading" empty-title="No invoices found" empty-message="Try adjusting your filters.">
-      <template #cell-amount="{ value }"><span class="font-mono">{{ currency(value) }}</span></template>
-      <template #cell-status="{ value }"><BaseBadge :tone="statusTone[value]">{{ value }}</BaseBadge></template>
-      <template #cell-actions="{ row }">
-        <button v-if="row.status !== 'paid'" @click="markPaid(row)" class="text-xs font-medium text-meridian-600 hover:text-pulse-500">Mark paid</button>
-      </template>
-    </DataTable>
+    <!-- Invoices -->
+    <section ref="invoicesEl" class="scroll-mt-6">
+      <div class="mb-4">
+        <h2 class="font-display text-lg font-semibold text-meridian-900 dark:text-white">Invoices</h2>
+      </div>
 
-    <div class="card-base p-5 mt-6">
-      <div class="flex items-center justify-between mb-4">
+      <!-- Status tabs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <button
+          v-for="t in statusTabs"
+          :key="t.key"
+          type="button"
+          @click="statusFilter = t.key"
+          :class="[
+            'text-left rounded-xl border px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-meridian-500',
+            statusFilter === t.key
+              ? 'border-meridian-500 bg-meridian-50 dark:bg-white/10 shadow-sm'
+              : 'border-meridian-100 dark:border-white/10 bg-white dark:bg-white/5 hover:border-meridian-300',
+          ]"
+        >
+          <div class="flex items-center justify-between text-sm text-meridian-500 dark:text-meridian-300">
+            <span>{{ t.label }}</span>
+            <span class="rounded-full bg-meridian-100 dark:bg-white/10 px-2 py-0.5 text-xs font-medium tabular-nums text-meridian-700 dark:text-meridian-100">{{ t.count }}</span>
+          </div>
+          <div class="mt-1 font-mono text-lg font-semibold text-meridian-900 dark:text-white">{{ currency(t.amount) }}</div>
+        </button>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="card-base p-4 mb-2 flex flex-wrap items-center gap-3">
+        <div class="relative w-full sm:w-72 mr-auto">
+          <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-meridian-400" />
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search invoice ID or patient…"
+            class="w-full rounded-lg border border-meridian-200 dark:border-white/10 bg-white dark:bg-white/5 py-2 pl-10 pr-9 text-sm text-meridian-800 dark:text-meridian-100 placeholder:text-meridian-400 focus:border-meridian-500 focus:outline-none focus:ring-2 focus:ring-meridian-500/20"
+          />
+          <button v-if="search" type="button" @click="search = ''" class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-meridian-400 hover:text-meridian-700" aria-label="Clear search">
+            <XMarkIcon class="h-4 w-4" />
+          </button>
+        </div>
+        <div class="w-44"><BaseSelect v-model="typeFilter" :options="typeOptions" placeholder="Type" /></div>
+        <button v-if="hasFilters" type="button" @click="clearFilters" class="text-sm font-medium text-meridian-600 hover:underline">Clear filters</button>
+      </div>
+
+      <DataTable
+        :columns="columns"
+        :rows="filteredInvoices"
+        :loading="loading"
+        :empty-title="hasFilters ? 'No invoices match your filters' : 'No invoices found'"
+        empty-message="Try adjusting your filters."
+      >
+        <template #cell-id="{ value }">
+          <span class="font-mono text-xs text-meridian-500 dark:text-meridian-300">{{ value.toUpperCase() }}</span>
+        </template>
+        <template #cell-patient="{ row }">
+          <div class="flex items-center gap-2.5">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-meridian-100 dark:bg-white/10 text-xs font-semibold text-meridian-700 dark:text-meridian-100">
+              {{ initials(row.patient) }}
+            </span>
+            <span class="font-medium text-meridian-900 dark:text-meridian-50">{{ row.patient }}</span>
+          </div>
+        </template>
+        <template #cell-type="{ value }">
+          <span class="inline-flex rounded-md bg-meridian-50 dark:bg-white/5 px-2 py-0.5 text-xs font-medium text-meridian-700 dark:text-meridian-200">{{ value }}</span>
+        </template>
+        <template #cell-amount="{ value }">
+          <span class="font-mono tabular-nums font-medium text-meridian-900 dark:text-white">{{ currency(value) }}</span>
+        </template>
+        <template #cell-status="{ value }"><BaseBadge :tone="statusTone[value]" class="capitalize">{{ value }}</BaseBadge></template>
+        <template #cell-actions="{ row }">
+          <div class="flex justify-end">
+            <button
+              v-if="row.status !== 'paid'"
+              type="button"
+              @click="markPaid(row)"
+              class="inline-flex items-center gap-1 rounded-lg border border-meridian-200 dark:border-white/10 px-2.5 py-1 text-xs font-medium text-meridian-700 dark:text-meridian-100 transition hover:bg-meridian-50 dark:hover:bg-white/10 hover:text-pulse-500"
+            >
+              <CheckCircleIcon class="h-4 w-4" />Mark paid
+            </button>
+            <span v-else class="text-xs text-meridian-400">Settled</span>
+          </div>
+        </template>
+      </DataTable>
+
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-meridian-500 dark:text-meridian-400">
+        <span>Showing {{ filteredInvoices.length }} of {{ invoices.length }} invoices</span>
+        <span>Total of shown: <span class="font-mono font-semibold text-meridian-800 dark:text-meridian-100">{{ currency(filteredTotal) }}</span></span>
+      </div>
+    </section>
+
+    <!-- Expenses -->
+    <div class="card-base p-5 mt-8">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
         <h3 class="font-display font-semibold text-meridian-900 dark:text-white">Operating expenses</h3>
-        <span class="text-sm font-mono text-meridian-500">Net: <span :class="netBalance >= 0 ? 'text-emerald-600' : 'text-pulse-600'">{{ currency(netBalance) }}</span></span>
+        <div class="flex items-center gap-4 text-sm font-mono text-meridian-500">
+          <span>Total: <span class="text-meridian-800 dark:text-meridian-100">{{ currency(totalExpenses) }}</span></span>
+          <span>Net: <span :class="netBalance >= 0 ? 'text-emerald-600' : 'text-pulse-600'">{{ currency(netBalance) }}</span></span>
+        </div>
       </div>
       <ul class="divide-y divide-meridian-100 dark:divide-white/5">
-        <li v-for="e in expenses" :key="e.id" class="flex items-center justify-between py-3">
-          <div>
-            <p class="text-sm font-medium text-meridian-800 dark:text-meridian-100">{{ e.category }}</p>
-            <p class="text-xs text-meridian-500">{{ e.vendor }} · {{ e.date }}</p>
+        <li v-for="e in expenses" :key="e.id" class="py-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-meridian-800 dark:text-meridian-100">{{ e.category }}</p>
+              <p class="text-xs text-meridian-500">{{ e.vendor }} · {{ e.date }}</p>
+            </div>
+            <div class="text-right">
+              <span class="font-mono text-sm text-meridian-700 dark:text-meridian-200">{{ currency(e.amount) }}</span>
+              <p class="text-xs text-meridian-400">{{ pct(e.amount, totalExpenses) }}% of total</p>
+            </div>
           </div>
-          <span class="font-mono text-sm text-meridian-700 dark:text-meridian-200">{{ currency(e.amount) }}</span>
+          <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-meridian-100 dark:bg-white/10">
+            <div class="h-full rounded-full bg-[#ff6b5b]/70" :style="{ width: (e.amount / maxExpense) * 100 + '%' }" />
+          </div>
         </li>
       </ul>
     </div>
 
+    <!-- New invoice modal -->
     <BaseModal v-model="createOpen" title="New invoice" size="sm">
       <form @submit.prevent="createInvoice" class="space-y-4">
         <BaseInput v-model="newInvoice.patient" label="Patient name" required />
         <BaseSelect v-model="newInvoice.type" label="Type" :options="typeOptions.filter(o => o.value)" />
         <BaseInput v-model="newInvoice.amount" type="number" label="Amount (USD)" placeholder="0.00" required />
+        <p class="text-xs text-meridian-500 dark:text-meridian-400">The invoice will be issued with status <span class="font-medium">Pending</span>.</p>
         <div class="flex justify-end gap-3 pt-2">
           <BaseButton type="button" variant="outline" @click="createOpen = false">Cancel</BaseButton>
           <BaseButton type="submit">Create invoice</BaseButton>
