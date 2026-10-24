@@ -9,11 +9,8 @@ import { useUiStore } from '@/stores/ui'
 import usersData from '@/data/users.json'
 import {
   MagnifyingGlassIcon,
-  UserPlusIcon,
-  EnvelopeIcon,
   PhoneIcon,
   XMarkIcon,
-  ShieldCheckIcon,
   UsersIcon,
 } from '@heroicons/vue/24/outline'
 
@@ -21,7 +18,12 @@ const ui = useUiStore()
 const loading = ref(true)
 onMounted(() => setTimeout(() => (loading.value = false), 500))
 
-const users = ref(usersData.map(({ password, ...u }) => u))
+// super-admin ke puro remove kora hoyeche
+const users = ref(
+  usersData
+    .filter((u) => u.role !== 'super-admin')
+    .map(({ password, ...u }) => u)
+)
 
 /* ---------- filters ---------- */
 const search = ref('')
@@ -30,7 +32,6 @@ const statusFilter = ref('')
 
 const roles = [
   { label: 'All roles', value: '' },
-  { label: 'Super Admin', value: 'super-admin' },
   { label: 'Doctor', value: 'doctor' },
   { label: 'Pharmacist', value: 'pharmacist' },
   { label: 'Patient', value: 'patient' },
@@ -39,6 +40,7 @@ const roles = [
 
 const statusTone = { active: 'success', suspended: 'danger', pending: 'warning' }
 const formatRole = (r) => r.replace('-', ' ')
+const whatsappLink = (phone) => `https://wa.me/${String(phone).replace(/\D/g, '')}`
 
 const statusTiles = computed(() => [
   { label: 'Total users', value: '', count: users.value.length },
@@ -100,7 +102,6 @@ async function confirmSuspend() {
         <h1 class="font-display text-2xl font-semibold text-meridian-900 dark:text-white">Users</h1>
         <p class="mt-1 text-sm text-meridian-500">Manage who can access the platform and what role they hold.</p>
       </div>
-     
     </div>
 
     <!-- Status tiles (click to filter) -->
@@ -179,15 +180,12 @@ async function confirmSuspend() {
         :key="n"
         class="animate-pulse rounded-2xl border border-meridian-200 bg-white/70 p-5 dark:border-white/10 dark:bg-white/5"
       >
-        <div class="flex items-center gap-3">
-          <div class="h-12 w-12 rounded-full bg-meridian-200 dark:bg-white/10" />
-          <div class="flex-1 space-y-2">
-            <div class="h-3.5 w-2/3 rounded bg-meridian-200 dark:bg-white/10" />
-            <div class="h-3 w-1/2 rounded bg-meridian-200 dark:bg-white/10" />
-          </div>
+        <div class="flex flex-col items-center gap-3">
+          <div class="h-16 w-16 rounded-full bg-meridian-200 dark:bg-white/10" />
+          <div class="h-3.5 w-1/2 rounded bg-meridian-200 dark:bg-white/10" />
+          <div class="h-3 w-2/3 rounded bg-meridian-200 dark:bg-white/10" />
         </div>
         <div class="mt-5 h-3 w-1/3 rounded bg-meridian-200 dark:bg-white/10" />
-        <div class="mt-3 h-3 w-1/2 rounded bg-meridian-200 dark:bg-white/10" />
         <div class="mt-5 h-9 rounded-lg bg-meridian-200 dark:bg-white/10" />
       </div>
     </div>
@@ -209,30 +207,28 @@ async function confirmSuspend() {
     <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <article
         v-for="u in filtered"
-        :key="u.email"
-        class="flex flex-col rounded-2xl border border-meridian-200 bg-white/70 p-5 transition hover:border-meridian-400 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-white/25"
+        :key="u.id ?? u.email"
+        class="relative flex flex-col rounded-2xl border border-meridian-200 bg-white/70 p-5 transition hover:border-meridian-400 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-white/25"
         :class="{ 'opacity-75': u.status === 'suspended' }"
       >
-        <!-- Identity -->
-        <div class="flex items-start gap-3">
+        <!-- Status badge (top right) -->
+        <BaseBadge :tone="statusTone[u.status]" class="absolute right-4 top-4">{{ u.status }}</BaseBadge>
+
+        <!-- Identity (center) -->
+        <div class="flex flex-col items-center pt-2 text-center">
           <BaseAvatar :src="u.avatar" :name="u.name" size="lg" />
-          <div class="min-w-0 flex-1">
-            <h3 class="truncate font-medium text-meridian-800 dark:text-meridian-100">{{ u.name }}</h3>
-            <p class="truncate text-sm text-meridian-500">{{ u.email }}</p>
-          </div>
-          <BaseBadge :tone="statusTone[u.status]" class="shrink-0">{{ u.status }}</BaseBadge>
+          <h3 class="mt-3 font-medium text-meridian-800 dark:text-meridian-100">{{ u.name }}</h3>
+          <p v-if="u.id" class="text-xs tabular-nums text-meridian-400">ID: {{ u.id }}</p>
+          <p class="mt-1 break-all text-sm text-meridian-500">{{ u.email }}</p>
+
+          <!-- Profession -->
+          <span class="mt-3 rounded-md bg-meridian-100/70 px-2.5 py-0.5 text-sm font-medium capitalize text-meridian-700 dark:bg-white/10 dark:text-meridian-100">
+            {{ formatRole(u.role) }}
+          </span>
         </div>
 
         <!-- Details -->
-        <dl class="mt-5 space-y-2.5 text-sm">
-          <div class="flex items-center justify-between gap-3">
-            <dt class="text-meridian-500">Role</dt>
-            <dd>
-              <span class="rounded-md bg-meridian-100/70 px-2 py-0.5 font-medium capitalize text-meridian-700 dark:bg-white/10 dark:text-meridian-100">
-                {{ formatRole(u.role) }}
-              </span>
-            </dd>
-          </div>
+        <dl class="mt-5 text-sm">
           <div class="flex items-center justify-between gap-3">
             <dt class="text-meridian-500">Phone</dt>
             <dd class="truncate text-meridian-700 dark:text-meridian-100">{{ u.phone || '—' }}</dd>
@@ -241,27 +237,30 @@ async function confirmSuspend() {
 
         <!-- Footer actions -->
         <div class="mt-5 flex items-center gap-2 border-t border-meridian-200 pt-4 dark:border-white/10">
-          <a
-            :href="`mailto:${u.email}`"
-            aria-label="Send email"
-            class="rounded-lg border border-meridian-200 p-2 text-meridian-500 transition hover:text-meridian-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400/60 dark:border-white/10"
-          >
-            <EnvelopeIcon class="h-4 w-4" />
-          </a>
-          <a
-            v-if="u.phone"
-            :href="`tel:${u.phone}`"
-            aria-label="Call user"
-            class="rounded-lg border border-meridian-200 p-2 text-meridian-500 transition hover:text-meridian-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400/60 dark:border-white/10"
-          >
-            <PhoneIcon class="h-4 w-4" />
-          </a>
+          <template v-if="u.phone">
+            <!-- WhatsApp -->
+            <a
+              :href="whatsappLink(u.phone)"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Chat on WhatsApp"
+              class="rounded-lg border border-meridian-200 p-2 text-meridian-500 transition hover:text-meridian-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400/60 dark:border-white/10"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+            </a>
+            <!-- Call -->
+            <a
+              :href="`tel:${u.phone}`"
+              aria-label="Call user"
+              class="rounded-lg border border-meridian-200 p-2 text-meridian-500 transition hover:text-meridian-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400/60 dark:border-white/10"
+            >
+              <PhoneIcon class="h-4 w-4" />
+            </a>
+          </template>
 
-          <span v-if="u.role === 'super-admin'" class="ml-auto inline-flex items-center gap-1.5 text-xs text-meridian-500">
-            <ShieldCheckIcon class="h-4 w-4" /> Protected account
-          </span>
           <button
-            v-else
             type="button"
             @click="askSuspend(u)"
             class="ml-auto rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400/60"
