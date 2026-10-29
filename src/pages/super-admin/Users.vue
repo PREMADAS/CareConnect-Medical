@@ -12,6 +12,7 @@ import {
   PhoneIcon,
   XMarkIcon,
   UsersIcon,
+  EyeIcon,
 } from '@heroicons/vue/24/outline'
 
 const ui = useUiStore()
@@ -92,6 +93,33 @@ async function confirmSuspend() {
     title: next === 'suspended' ? 'User suspended' : 'User reactivated',
   })
 }
+
+/* ---------- view details ---------- */
+const detailsOpen = ref(false)
+const selected = ref(null)
+
+function openDetails(row) {
+  selected.value = row
+  detailsOpen.value = true
+}
+
+const prettyKey = (k) =>
+  k.replace(/([A-Z])/g, ' $1').replace(/[_-]/g, ' ')
+
+const detailEntries = computed(() =>
+  selected.value
+    ? Object.entries(selected.value)
+        .filter(([k]) => !['avatar', 'name'].includes(k))
+        .map(([k, v]) => [
+          prettyKey(k),
+          v === null || v === undefined || v === ''
+            ? '—'
+            : typeof v === 'object'
+              ? JSON.stringify(v)
+              : String(v),
+        ])
+    : []
+)
 </script>
 
 <template>
@@ -260,6 +288,16 @@ async function confirmSuspend() {
             </a>
           </template>
 
+          <!-- View details -->
+          <button
+            type="button"
+            aria-label="View details"
+            @click="openDetails(u)"
+            class="rounded-lg border border-meridian-200 p-2 text-meridian-500 transition hover:text-meridian-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pulse-400/60 dark:border-white/10"
+          >
+            <EyeIcon class="h-4 w-4" />
+          </button>
+
           <button
             type="button"
             @click="askSuspend(u)"
@@ -285,5 +323,45 @@ async function confirmSuspend() {
       :loading="suspending"
       @confirm="confirmSuspend"
     />
+
+    <!-- Details modal -->
+    <Teleport to="body">
+      <div
+        v-if="detailsOpen && selected"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="detailsOpen = false"
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-meridian-200 bg-white p-6 shadow-xl dark:border-white/10 dark:bg-meridian-900"
+        >
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <BaseAvatar :src="selected.avatar" :name="selected.name" size="lg" />
+              <div>
+                <h2 class="font-medium text-meridian-900 dark:text-white">{{ selected.name }}</h2>
+                <BaseBadge :tone="statusTone[selected.status]" class="mt-1">{{ selected.status }}</BaseBadge>
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-label="Close"
+              @click="detailsOpen = false"
+              class="rounded-full p-1 text-meridian-400 hover:text-meridian-600"
+            >
+              <XMarkIcon class="h-5 w-5" />
+            </button>
+          </div>
+
+          <dl class="mt-5 divide-y divide-meridian-200 text-sm dark:divide-white/10">
+            <div v-for="[label, value] in detailEntries" :key="label" class="flex justify-between gap-4 py-2.5">
+              <dt class="capitalize text-meridian-500">{{ label }}</dt>
+              <dd class="break-all text-right text-meridian-800 dark:text-meridian-100">{{ value }}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </Teleport>
   </DashboardLayout>
 </template>
