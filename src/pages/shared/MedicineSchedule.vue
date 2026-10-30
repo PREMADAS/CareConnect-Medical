@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseModal from '@/components/modals/BaseModal.vue'
 import BaseInput from '@/components/forms/BaseInput.vue'
@@ -36,13 +35,85 @@ const dayItems = computed(() =>
   schedule.value.filter((s) => s.date === activeDate.value).sort((a, b) => a.time.localeCompare(b.time))
 )
 
+// time-wise grouping
+const groups = computed(() => {
+  const map = {}
+  dayItems.value.forEach((item) => {
+    if (!map[item.time]) map[item.time] = []
+    map[item.time].push(item)
+  })
+  return Object.keys(map)
+    .sort()
+    .map((time) => ({ time, items: map[time] }))
+})
+
+// "13:00" -> "1:00 PM"
+function formatTime(t) {
+  if (!t) return ''
+  const [h, m] = t.split(':').map(Number)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const hour = h % 12 || 12
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`
+}
+
+// status: 'pending' | 'taken' | 'skipped'
+function getStatus(item) {
+  if (item.skipped) return 'skipped'
+  if (item.taken) return 'taken'
+  return 'pending'
+}
+
+const statusStyles = {
+  pending: {
+    card: 'border-gray-200 bg-white dark:border-white/10 dark:bg-white/5',
+    badge: 'bg-slate-500 text-white',
+    label: 'PENDING',
+  },
+  taken: {
+    card: 'border-green-500 bg-green-50 dark:border-green-500/60 dark:bg-green-500/10',
+    badge: 'bg-green-600 text-white',
+    label: 'TAKEN',
+  },
+  skipped: {
+    card: 'border-orange-400 bg-orange-50 dark:border-orange-400/60 dark:bg-orange-400/10',
+    badge: 'bg-orange-500 text-white',
+    label: 'SKIPPED',
+  },
+}
+
 function markTaken(item) {
   item.taken = true
-  ui.toast({ type: 'success', title: 'Dose logged', message: `${item.medicine} marked as taken at ${item.time}.` })
+  item.skipped = false
+  ui.toast({ type: 'success', title: 'Dose logged', message: `${item.medicine} marked as taken at ${formatTime(item.time)}.` })
+}
+function markSkipped(item) {
+  item.skipped = true
+  item.taken = false
+  ui.toast({ type: 'warning', title: 'Dose skipped', message: `${item.medicine} marked as skipped.` })
+}
+function toggleTaken(item) {
+  if (getStatus(item) === 'taken') {
+    item.taken = false
+  } else {
+    markTaken(item)
+  }
+}
+function markAllDoses(group) {
+  group.items.forEach((item) => {
+    item.taken = true
+    item.skipped = false
+  })
+  ui.toast({ type: 'success', title: 'All doses logged', message: `All doses at ${formatTime(group.time)} marked as taken.` })
 }
 function addReminder() {
   schedule.value.push({
-    id: `sch_${Date.now()}`, medicine: form.value.medicine, time: form.value.time, taken: false, date: activeDate.value,
+    id: `sch_${Date.now()}`,
+    medicine: form.value.medicine,
+    time: form.value.time,
+    frequency: form.value.frequency,
+    taken: false,
+    skipped: false,
+    date: activeDate.value,
   })
   addOpen.value = false
   ui.toast({ type: 'success', title: 'Reminder added' })
@@ -72,25 +143,83 @@ function addReminder() {
       <div v-if="loading" class="space-y-4">
         <SkeletonLine v-for="i in 4" :key="i" height="3.5rem" />
       </div>
-      <ol v-else-if="dayItems.length" class="relative border-l-2 border-dashed border-meridian-200 dark:border-white/10 ml-4 space-y-6 py-2">
-        <li v-for="item in dayItems" :key="item.id" class="relative pl-6">
-          <span
-            class="absolute -left-[9px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-white dark:ring-surface-darkcard"
-            :class="item.taken ? 'bg-meridian-600' : 'bg-pulse-400'"
-          >
-            <CheckIcon v-if="item.taken" class="h-2.5 w-2.5 text-white" />
-          </span>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <p class="text-sm font-medium text-meridian-800 dark:text-meridian-100 flex items-center gap-1.5">
-                <ClockIcon class="h-4 w-4 text-meridian-400" /> {{ item.time }} — {{ item.medicine }}
-              </p>
-              <BaseBadge :tone="item.taken ? 'success' : 'warning'" class="mt-1.5">{{ item.taken ? 'Taken' : 'Pending' }}</BaseBadge>
-            </div>
-            <BaseButton v-if="!item.taken" size="sm" variant="outline" @click="markTaken(item)">Mark taken</BaseButton>
+
+      <div v-else-if="groups.length" class="space-y-8">
+        <section v-for="group in groups" :key="group.time">
+          <!-- Group header -->
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xl font-bold text-meridian-900 dark:text-white">{{ formatTime(group.time) }}</h2>
+            <button
+              type="button"
+              class="text-xs font-semibold tracking-wide text-blue-600 hover:text-blue-700 dark:text-blue-400 btn-focus-ring rounded"
+              @click="markAllDoses(group)"
+            >
+              MARK ALL DOSES
+            </button>
           </div>
-        </li>
-      </ol>
+
+          <!-- Cards -->
+          <div class="space-y-3">
+            <article
+              v-for="item in group.items" :key="item.id"
+              class="relative rounded-2xl border p-4 shadow-sm transition-colors"
+              :class="statusStyles[getStatus(item)].card"
+            >
+              <!-- Checkbox circle -->
+              <button
+                type="button"
+                class="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full border-2 transition-colors btn-focus-ring"
+                :class="getStatus(item) === 'taken'
+                  ? 'border-blue-600 bg-blue-600 text-white'
+                  : 'border-gray-300 bg-white dark:border-white/20 dark:bg-transparent'"
+                :aria-label="`Toggle ${item.medicine} taken`"
+                @click="toggleTaken(item)"
+              >
+                <CheckIcon v-if="getStatus(item) === 'taken'" class="h-4 w-4" stroke-width="3" />
+              </button>
+
+              <div class="pr-10">
+                <h3 class="text-lg font-semibold text-meridian-900 dark:text-white">{{ item.medicine }}</h3>
+                <p v-if="item.dose || item.instruction" class="text-sm text-gray-500 dark:text-meridian-300">
+                  {{ [item.dose, item.instruction].filter(Boolean).join(', ') }}
+                </p>
+                <p v-if="item.frequency" class="text-sm italic text-gray-400 dark:text-meridian-400">{{ item.frequency }}</p>
+
+                <span
+                  class="mt-2 inline-block rounded-md px-2.5 py-0.5 text-[11px] font-bold tracking-wider"
+                  :class="statusStyles[getStatus(item)].badge"
+                >
+                  {{ statusStyles[getStatus(item)].label }}
+                </span>
+
+                <div class="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    class="rounded-full border px-4 py-1 text-sm font-medium transition-colors btn-focus-ring"
+                    :class="getStatus(item) === 'taken'
+                      ? 'border-green-600 text-green-700 bg-white dark:bg-transparent dark:text-green-400'
+                      : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-meridian-100'"
+                    @click="markTaken(item)"
+                  >
+                    Taken
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-full border px-4 py-1 text-sm font-medium transition-colors btn-focus-ring"
+                    :class="getStatus(item) === 'skipped'
+                      ? 'border-orange-500 text-orange-700 bg-white dark:bg-transparent dark:text-orange-400'
+                      : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-meridian-100'"
+                    @click="markSkipped(item)"
+                  >
+                    Skipped
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+
       <EmptyState v-else title="No doses scheduled" message="Add a reminder to start tracking this day.">
         <template #icon><ClockIcon class="h-8 w-8 text-meridian-400" /></template>
       </EmptyState>
